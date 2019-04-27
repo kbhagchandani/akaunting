@@ -45,12 +45,12 @@ class CustomerMenu
             ]);
 
             // Payments
-            $menu->add([
+            /* $menu->add([
                 'url'   => 'customers/payments',
                 'title' => trans_choice('general.payments', 2),
                 'icon'  => 'fa fa-money',
                 'order' => 3,
-            ]);
+            ]); */
 
             // Transactions
             $menu->add([
