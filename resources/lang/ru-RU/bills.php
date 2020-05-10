@@ -31,11 +31,11 @@ return [
     'mark_received'         => 'Отметить как получено',
     'download_pdf'          => 'Скачать PDF',
     'send_mail'             => 'Отправить E-mail',
-    'create_bill'           => 'Create Bill',
-    'receive_bill'          => 'Receive Bill',
-    'make_payment'          => 'Make Payment',
+    'create_bill'           => 'Создать закупку',
+    'receive_bill'          => 'Получить закупку',
+    'make_payment'          => 'Сделать оплату',
 
-    'status' => [
+    'statuses' => [
         'draft'             => 'Черновик',
         'received'          => 'Получено',
         'partial'           => 'Частично',

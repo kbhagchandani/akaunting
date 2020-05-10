@@ -1,16 +1,13 @@
 <html lang="{{ app()->getLocale() }}">
-    @include('partials.admin.head')
 
-    @push('css')
-    <!-- Bootstrap 3 print fix -->
-    <link rel="stylesheet" href="{{ asset('public/css/bootstrap3-print-fix.css?v=1.2') }}">
-    @endpush
+    @include('partials.print.head')
 
-    <body onload="window.print();" class="print-width">
+    <body onload="window.print();">
         @stack('body_start')
 
-        @yield('content')
+            @yield('content')
 
         @stack('body_end')
     </body>
+
 </html>

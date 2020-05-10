@@ -29,6 +29,7 @@ return [
     'add_payment'           => 'Ödeme Ekle',
     'mark_paid'             => 'Ödendi İşaretle',
     'mark_sent'             => 'Gönderildi İşaretle',
+    'mark_viewed'           => 'Görüntülendi İşaretle',
     'download_pdf'          => 'PDF İndir',
     'send_mail'             => 'Email Gönder',
     'all_invoices'          => 'Tüm faturaları görüntülemek için giriş yapın',
@@ -37,23 +38,27 @@ return [
     'get_paid'              => 'Ödeme Al',
     'accept_payments'       => 'Online Tahsilat Al',
 
-    'status' => [
+    'statuses' => [
         'draft'             => 'Taslak',
-        'sent'              => 'Gönderilen',
-        'viewed'            => 'Görüldü',
+        'sent'              => 'Gönderildi',
+        'viewed'            => 'Görüntülendi',
         'approved'          => 'Onaylandı',
-        'partial'           => 'Kısmi',
-        'paid'              => 'Ödenmiş',
+        'partial'           => 'Kısmi Ödeme',
+        'paid'              => 'Ödendi',
+        'overdue'           => 'Gecikmiş',
+        'unpaid'            => 'Ödenmemiş',
     ],
 
     'messages' => [
-        'email_sent'        => 'Fatura emaili başarı ile gönderildi!',
-        'marked_sent'       => 'Fatura başarıyla gönderilmiş olarak işaretlendi!',
+        'email_sent'        => 'Fatura e-postası gönderildi!',
+        'marked_sent'       => 'Fatura gönderildi olarak işaretlendi!',
+        'marked_paid'       => 'Fatura ödendi olark işaretlendi!',
         'email_required'    => 'Bu müşteri için e-posta adresi yok!',
         'draft'             => 'Bu bir <b>TASLAK</b> faturadır ve gönderildikten sonra grafiklere yansıtılacaktır.',
 
         'status' => [
             'created'       => ':date tarihinde oluşturuldu',
+            'viewed'        => 'Görüldü',
             'send' => [
                 'draft'     => 'Gönderilmedi',
                 'sent'      => ':date tarihinde gönderildi',
@@ -62,11 +67,6 @@ return [
                 'await'     => 'Ödeme bekliyor',
             ],
         ],
-    ],
-
-    'notification' => [
-        'message'           => ':amount tutarında faturayı :customer ödemediği için bu iletiyi almaktasınız.',
-        'button'            => 'Şimdi Öde',
     ],
 
 ];

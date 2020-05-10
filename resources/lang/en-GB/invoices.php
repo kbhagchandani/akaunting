@@ -29,6 +29,7 @@ return [
     'add_payment'           => 'Add Payment',
     'mark_paid'             => 'Mark Paid',
     'mark_sent'             => 'Mark Sent',
+    'mark_viewed'           => 'Mark Viewed',
     'download_pdf'          => 'Download PDF',
     'send_mail'             => 'Send Email',
     'all_invoices'          => 'Login to view all invoices',
@@ -37,23 +38,27 @@ return [
     'get_paid'              => 'Get Paid',
     'accept_payments'       => 'Accept Online Payments',
 
-    'status' => [
+    'statuses' => [
         'draft'             => 'Draft',
         'sent'              => 'Sent',
         'viewed'            => 'Viewed',
         'approved'          => 'Approved',
         'partial'           => 'Partial',
         'paid'              => 'Paid',
+        'overdue'           => 'Overdue',
+        'unpaid'            => 'Unpaid',
     ],
 
     'messages' => [
-        'email_sent'        => 'Invoice email has been sent successfully!',
-        'marked_sent'       => 'Invoice marked as sent successfully!',
+        'email_sent'        => 'Invoice email has been sent!',
+        'marked_sent'       => 'Invoice marked as sent!',
+        'marked_paid'       => 'Invoice marked as paid!',
         'email_required'    => 'No email address for this customer!',
         'draft'             => 'This is a <b>DRAFT</b> invoice and will be reflected to charts after it gets sent.',
 
         'status' => [
             'created'       => 'Created on :date',
+            'viewed'        => 'Viewed',
             'send' => [
                 'draft'     => 'Not sent',
                 'sent'      => 'Sent on :date',
@@ -62,11 +67,6 @@ return [
                 'await'     => 'Awaiting payment',
             ],
         ],
-    ],
-
-    'notification' => [
-        'message'           => 'You are receiving this email because you have an upcoming :amount invoice to :customer customer.',
-        'button'            => 'Pay Now',
     ],
 
 ];

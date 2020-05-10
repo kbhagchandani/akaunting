@@ -9,7 +9,7 @@ return [
     'order_number'          => '注文番号',
     'bill_from'             => '請求元',
 
-    'quantity'              => '量',
+    'quantity'              => '数量',
     'price'                 => '価格',
     'sub_total'             => '小計',
     'discount'              => '割引',
@@ -18,7 +18,7 @@ return [
 
     'item_name'             => 'アイテム名|アイテム名',
 
-    'show_discount'         => '：ディスカウント％ディスカウント',
+    'show_discount'         => ':discount% ディスカウント',
     'add_discount'          => '割引を追加',
     'discount_desc'         => '小計の',
 
@@ -35,11 +35,13 @@ return [
     'receive_bill'          => '請求書を受け取る',
     'make_payment'          => '支払う',
 
-    'status' => [
-        'draft'             => '下書き',
+    'statuses' => [
+        'draft'             => 'ドラフト',
         'received'          => '受け取った',
         'partial'           => '部分的',
-        'paid'              => '有料',
+        'paid'              => '支払済み',
+        'overdue'           => '遅れた',
+        'unpaid'            => '未払い',
     ],
 
     'messages' => [
@@ -47,10 +49,10 @@ return [
         'draft'             => 'これは<b>ドラフト</b>請求書で、受け取り後にチャートに反映されます。',
 
         'status' => [
-            'created'       => '作成日：日付',
+            'created'       => '作成日 :date',
             'receive' => [
                 'draft'     => '送信されません',
-                'received'  => '受信日：日付',
+                'received'  => '受信日 :date',
             ],
             'paid' => [
                 'await'     => '支払いを待っている',

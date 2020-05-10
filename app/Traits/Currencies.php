@@ -3,81 +3,50 @@
 namespace App\Traits;
 
 use Akaunting\Money\Money;
-use Akaunting\Money\Currency;
 
 trait Currencies
 {
-
-    public function convert($amount, $code, $rate, $format = false)
+    public function convert($method, $amount, $from, $to, $rate, $format = false)
     {
-        $default = new Currency(setting('general.default_currency', 'USD'));
+        $money = Money::$to($amount, $format);
 
-        if ($format) {
-            $money = Money::$code($amount, true)->convert($default, (double) $rate)->format();
-        } else {
-            $money = Money::$code($amount)->convert($default, (double) $rate)->getAmount();
+        // No need to convert same currency
+        if ($from == $to) {
+            return $format ? $money->format() : $money->getAmount();
         }
 
-        return $money;
+        $money = $money->$method((double) $rate);
+
+        return $format ? $money->format() : $money->getAmount();
     }
 
-    public function divide($amount, $code, $rate, $format = false)
+    public function convertToDefault($amount, $from, $rate, $format = false)
     {
-        if ($format) {
-            $money = Money::$code($amount, true)->divide((double) $rate)->format();
-        } else {
-            $money = Money::$code($amount)->divide((double) $rate)->getAmount();
-        }
-
-        return $money;
+        return $this->convert('divide', $amount, $from, $this->getDefaultCurrency(), $rate, $format);
     }
 
-    public function reverseConvert($amount, $code, $rate, $format = false)
+    public function convertFromDefault($amount, $to, $rate, $format = false)
     {
-        $default = setting('general.default_currency', 'USD');
-
-        $code = new Currency($code);
-
-        if ($format) {
-            $money = Money::$default($amount, true)->convert($code, (double) $rate)->format();
-        } else {
-            $money = Money::$default($amount)->convert($code, (double) $rate)->getAmount();
-        }
-
-        return $money;
+        return $this->convert('multiply', $amount, $this->getDefaultCurrency(), $to, $rate, $format);
     }
 
-    public function dynamicConvert($default, $amount, $code, $rate, $format = false)
+    public function getAmountConvertedToDefault($format = false, $with_tax = true)
     {
-        $code = new Currency($code);
-
-        if ($format) {
-            $money = Money::$default($amount, true)->convert($code, (double) $rate)->format();
-        } else {
-            $money = Money::$default($amount)->convert($code, (double) $rate)->getAmount();
-        }
-
-        return $money;
+        return $this->convertToDefault($this->getAmount($with_tax), $this->currency_code, $this->currency_rate, $format);
     }
 
-    public function getConvertedAmount($format = false, $with_tax = true)
+    public function getAmountConvertedFromDefault($format = false, $with_tax = true)
     {
-        $amount = $with_tax ? $this->amount : (isset($this->amount_without_tax) ? $this->amount_without_tax : $this->amount);
-
-        return $this->convert($amount, $this->currency_code, $this->currency_rate, $format);
+        return $this->convertFromDefault($this->getAmount($with_tax), $this->currency_code, $this->currency_rate, $format);
     }
 
-    public function getReverseConvertedAmount($format = false, $with_tax = true)
+    public function getAmount($with_tax = true)
     {
-        $amount = $with_tax ? $this->amount : (isset($this->amount_without_tax) ? $this->amount_without_tax : $this->amount);
-
-        return $this->reverseConvert($amount, $this->currency_code, $this->currency_rate, $format);
+        return $with_tax ? $this->amount : (isset($this->amount_without_tax) ? $this->amount_without_tax : $this->amount);
     }
 
-    public function getDynamicConvertedAmount($format = false, $with_tax = true)
+    public function getDefaultCurrency()
     {
-        $amount = $with_tax ? $this->amount : (isset($this->amount_without_tax) ? $this->amount_without_tax : $this->amount);
-
-        return $this->dynamicConvert($this->default_currency_code, $amount, $this->currency_code, $this->currency_rate, $format);
+        return !empty($this->default_currency_code) ? $this->default_currency_code : setting('default.currency', 'USD');
     }
 }

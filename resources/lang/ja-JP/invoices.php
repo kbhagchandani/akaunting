@@ -18,7 +18,7 @@ return [
 
     'item_name'             => 'アイテム名|アイテム名',
 
-    'show_discount'         => '：ディスカウント％ディスカウント',
+    'show_discount'         => ':discount% ディスカウント',
     'add_discount'          => '割引を追加',
     'discount_desc'         => '小計の',
 
@@ -29,6 +29,7 @@ return [
     'add_payment'           => '支払いを追加',
     'mark_paid'             => 'マークペイド',
     'mark_sent'             => '送信済みマーク',
+    'mark_viewed'           => 'マーク済み',
     'download_pdf'          => 'PDFをダウンロード',
     'send_mail'             => 'メールを送る',
     'all_invoices'          => 'すべての請求書を表示するにはログインしてください',
@@ -37,36 +38,35 @@ return [
     'get_paid'              => '支払いを受ける',
     'accept_payments'       => 'オンラインでの支払いを受け入れる',
 
-    'status' => [
-        'draft'             => '下書き',
+    'statuses' => [
+        'draft'             => 'ドラフト',
         'sent'              => '送信',
         'viewed'            => '閲覧',
-        'approved'          => '承認',
+        'approved'          => '承認済み',
         'partial'           => '部分的',
-        'paid'              => '有料',
+        'paid'              => '支払済み',
+        'overdue'           => '遅れた',
+        'unpaid'            => '未払い',
     ],
 
     'messages' => [
-        'email_sent'        => '請求書のEメールは正常に送信されました。',
-        'marked_sent'       => '請求書は正常に送信されたとマークされました。',
+        'email_sent'        => '請求書メールが送信されました！',
+        'marked_sent'       => '請求書が送信済みとしてマークされました！',
+        'marked_paid'       => '支払済みとしてマークされた請求書！',
         'email_required'    => 'この顧客のメールアドレスはありません。',
         'draft'             => 'これは <b>ドラフト</b>請求書で、送信後にチャートに反映されます。',
 
         'status' => [
-            'created'       => '作成日：日付',
+            'created'       => '作成日 :date',
+            'viewed'        => '見た',
             'send' => [
                 'draft'     => '送信されません',
-                'sent'      => '送信: 日付',
+                'sent'      => '送信 :date',
             ],
             'paid' => [
                 'await'     => '支払いを待っている',
             ],
         ],
-    ],
-
-    'notification' => [
-        'message'           => '今後、このメールを受信して​​います：請求書の金額:カスタマー:カスタマー',
-        'button'            => '今払う',
     ],
 
 ];

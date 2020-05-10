@@ -22,8 +22,8 @@ return [
     'add_discount'          => 'إضافة خصم',
     'discount_desc'         => 'من المجموع الجزئي',
 
-    'payment_due'           => 'استحقاق الدفع',
-    'amount_due'            => 'استحقاق المبلغ',
+    'payment_due'           => 'الدفع المستحق',
+    'amount_due'            => 'المبلغ المستحق',
     'paid'                  => 'مدفوع',
     'histories'             => 'سجلات',
     'payments'              => 'المدفوعات',
@@ -31,25 +31,27 @@ return [
     'mark_received'         => 'تحديد كمستلم',
     'download_pdf'          => 'تحميل PDF',
     'send_mail'             => 'إرسال بريد إلكتروني',
-    'create_bill'           => 'إنشاء فاتورة',
-    'receive_bill'          => 'إستلام فاتورة',
+    'create_bill'           => 'إنشاء فاتورة شراء',
+    'receive_bill'          => 'إستلام فاتورة شراء',
     'make_payment'          => 'القيام بالدفع',
 
-    'status' => [
+    'statuses' => [
         'draft'             => 'مسودة',
-        'received'          => 'مستلم',
+        'received'          => 'مستلمة',
         'partial'           => 'جزئي',
         'paid'              => 'مدفوع',
+        'overdue'           => 'متأخر',
+        'unpaid'            => 'غير مدفوع',
     ],
 
     'messages' => [
         'received'          => 'تم تحويل فاتورة الشراء إلى فاتورة مستلمة بنجاح!',
-        'draft'             => 'This is a <b>DRAFT</b> bill and will be reflected to charts after it gets received.',
+        'draft'             => 'هذة فاتورة شراء عبارة عن <b> مسودة </b> و سوف يتم اظهارها بالنظام بعد ان يتم استحقاقها.',
 
         'status' => [
             'created'       => 'إضافة في: تاريخ',
             'receive' => [
-                'draft'     => 'عدم الإرسال',
+                'draft'     => 'لم يتم ارسالها',
                 'received'  => 'وردت في: تاريخ',
             ],
             'paid' => [

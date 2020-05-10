@@ -2,6 +2,7 @@
 
 return [
 
+    'dashboards'            => 'Skrivebord|Skriveborde',
     'items'                 => 'Vare|Varer',
     'incomes'               => 'Indkomst|Indkomster',
     'invoices'              => 'Faktura|Fakturaer',
@@ -41,8 +42,15 @@ return [
     'contacts'              => 'Kontakt|Kontakter',
     'reconciliations'       => 'Afstemt|Afstemninger',
     'developers'            => 'Udvikler|Udviklere',
+    'schedules'             => 'Tidsplan|Tidsplaner',
+    'groups'                => 'Gruppe|Grupper',
+    'charts'                => 'Diagram|Diagrammer',
+    'localisations'         => 'Lokalisering|Lokaliseringer',
+    'defaults'              => 'Standard|Standarder',
+    'widgets'               => 'Widget|Widgets',
 
     'dashboard'             => 'Oversigt',
+    'welcome'               => 'Velkommen',
     'banking'               => 'Bank',
     'general'               => 'Generelt',
     'no_records'            => 'Ingen poster',
@@ -54,6 +62,7 @@ return [
     'no'                    => 'Nej',
     'na'                    => 'Ikke tilgængeligt',
     'daily'                 => 'Dagligt',
+    'weekly'                => 'Ugentlig',
     'monthly'               => 'Månedlig',
     'quarterly'             => 'Kvartalsvis',
     'yearly'                => 'Årlig',
@@ -80,9 +89,11 @@ return [
     'reference'             => 'Reference',
     'attachment'            => 'Bilag',
     'change'                => 'Ændre',
+    'change_type'           => 'Change :type',
     'switch'                => 'Skift',
     'color'                 => 'Farve',
     'save'                  => 'Gem',
+    'confirm'               => 'Bekræft',
     'cancel'                => 'Annullér',
     'loading'               => 'Indlæser...',
     'from'                  => 'Fra:',
@@ -115,17 +126,27 @@ return [
     'go_to'                 => 'Gå til :name',
     'created_date'          => 'Oprettelsesdato',
     'period'                => 'Periode',
+    'frequency'             => 'Hyppighed',
     'start'                 => 'Start',
     'end'                   => 'Slut',
     'clear'                 => 'Ryd',
     'difference'            => 'Forskel',
+    'footer'                => 'Sidefod',
+    'start_date'            => 'Startdato',
+    'basis'                 => 'Basis',
+    'accrual'               => 'Periodiseret',
+    'cash'                  => 'Kontant',
+    'group_by'              => 'Grupper efter',
+    'accounting'            => 'Regnskab',
 
     'title' => [
         'new'               => 'Ny :type',
         'edit'              => 'Rediger :type',
+        'delete'            => 'Slet !type',
         'create'            => 'Opret !type',
         'send'              => 'Send :type',
         'get'               => 'Hent :type',
+        'add'               => 'Tilføj :type',
     ],
 
     'form' => [
@@ -134,6 +155,7 @@ return [
             'field'         => '- Vælg :field -',
             'file'          => 'Vælg fil',
         ],
+        'add_new'           => 'Tilføj nyt :field',
         'no_file_selected'  => 'Ingen fil valgt...',
     ],
 
@@ -144,4 +166,16 @@ return [
         'this_month' => 'Denne måned',
         'last_month' => 'Sidste måned',
     ],
+
+    'empty' => [
+        'documentation' => 'Check <a href=":url" target="_blank" class="text-success">dokumentationen</a> for flere oplysninger.',
+        'items' => 'Enheder kan være produkter eller services. Du kan bruge enheder når du opretter faktura og regninger.',
+        'invoices' => 'Faktura kan være engang eller gentagne. Du kan sende dem til kunder og begynde at modtage onlinebetaling.',
+        'revenues' => 'Omsætning er en betalt indtægts-transaktion. Det kan være en uafhængig post (ei. deponering) eller tilføjet til en faktura.',
+        'customers' => 'Kunder er obligatorisk hvis du vil oprette en faktura. De kan også logge ind i klientportalen og se deres balance.',
+        'bills' => 'Regninger kan være engang eller gentagne. De indikerer at du skylder leverandører for produkter eller services du har købt.',
+        'payments' => 'Betaling er en betalt udgiftstransaktion. Det kan være en uafhængig post (ie. kassebon) eller tilføjet til en regning.',
+        'vendors' => 'Leverandører er obligatorisk hvis du vil oprette en regning. Du kan se balancen og filtrere reporten efter leverandør.',
+    ],
+
 ];

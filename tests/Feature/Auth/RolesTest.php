@@ -2,13 +2,12 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Models\Auth\Permission;
+use App\Jobs\Auth\CreateRole;
 use App\Models\Auth\Role;
 use Tests\Feature\FeatureTestCase;
 
 class RolesTest extends FeatureTestCase
 {
-
     public function testItShouldSeeRoleListPage()
     {
         $this->loginAs()
@@ -28,58 +27,51 @@ class RolesTest extends FeatureTestCase
     public function testItShouldCreateRole()
     {
         $this->loginAs()
-            ->post(route('roles.store'), $this->getRoleRequest())
-            ->assertStatus(302)
-            ->assertRedirect(route('roles.index'));
+            ->post(route('roles.store'), $this->getRequest())
+            ->assertStatus(200);
 
         $this->assertFlashLevel('success');
     }
 
     public function testItShouldSeeRoleUpdatePage()
     {
-        $role = Role::create($this->getRoleRequest());
+        $role = $this->dispatch(new CreateRole($this->getRequest()));
 
         $this->loginAs()
-            ->get(route('roles.edit', ['role' => $role->id]))
+            ->get(route('roles.edit', $role->id))
             ->assertStatus(200)
             ->assertSee($role->name);
     }
 
     public function testItShouldUpdateRole()
     {
-        $request = $this->getRoleRequest();
+        $request = $this->getRequest();
 
-        $role = Role::create($request);
+        $role = $this->dispatch(new CreateRole($request));
 
-        $request['name'] = $this->faker->name;
+        $request['display_name'] = $this->faker->word;
 
         $this->loginAs()
             ->patch(route('roles.update', $role->id), $request)
-            ->assertStatus(302)
-            ->assertRedirect(route('roles.index'));
+            ->assertStatus(200)
+            ->assertSee($request['display_name']);
 
         $this->assertFlashLevel('success');
     }
 
     public function testItShouldDeleteRole()
     {
-        $role = Role::create($this->getRoleRequest());
+        $role = $this->dispatch(new CreateRole($this->getRequest()));
 
         $this->loginAs()
             ->delete(route('roles.destroy', $role->id))
-            ->assertStatus(302)
-            ->assertRedirect(route('roles.index'));
+            ->assertStatus(200);
 
         $this->assertFlashLevel('success');
     }
 
-    private function getRoleRequest()
+    public function getRequest()
     {
-        return [
-            'name' => $this->faker->text(5),
-            'display_name' => $this->faker->text(5),
-            'description' => $this->faker->text(5),
-            'permissions' => Permission::take(10)->pluck('id')->toArray(),
-        ];
+        return factory(Role::class)->states('permissions')->raw();
     }
 }

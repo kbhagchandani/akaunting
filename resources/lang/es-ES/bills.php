@@ -32,24 +32,26 @@ return [
     'download_pdf'          => 'Descargar PDF',
     'send_mail'             => 'Enviar Email',
     'create_bill'           => 'Crear Recibo',
-    'receive_bill'          => 'Recibe Recibo',
-    'make_payment'          => 'Hacer Pago',
+    'receive_bill'          => 'Recibir factura',
+    'make_payment'          => 'Pagar',
 
-    'status' => [
+    'statuses' => [
         'draft'             => 'Borrador',
         'received'          => 'Recibido',
         'partial'           => 'Parcial',
         'paid'              => 'Pagado',
+        'overdue'           => 'Vencido',
+        'unpaid'            => 'No Pagado',
     ],
 
     'messages' => [
         'received'          => 'Recibo marcado como recibido con éxito!',
-        'draft'             => 'Este es un recibo <b>BORRADOR</b> y se reflejará en los gráficos luego de recibirse.',
+        'draft'             => 'Este es un<b>BORRADOR</b> de factura y se reflejará en los gráficos luego de que sea enviada.',
 
         'status' => [
             'created'       => 'Creado el :date',
             'receive' => [
-                'draft'     => 'No enviado',
+                'draft'     => 'Sin enviar',
                 'received'  => 'Recibido el :date',
             ],
             'paid' => [

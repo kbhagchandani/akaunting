@@ -8,6 +8,7 @@ return [
         'deleted'           => ':type borrado!',
         'duplicated'        => ': type duplicado!',
         'imported'          => ':type importado!',
+        'exported'          => ':type exportado!',
         'enabled'           => ':type habilitado!',
         'disabled'          => ':type deshabilitado!',
     ],
@@ -18,7 +19,8 @@ return [
         'customer'          => 'Error: Usuario no creado! :name ya utiliza esta dirección de correo electrónico.',
         'no_file'           => 'Error: Ningún archivo seleccionado!',
         'last_category'     => 'Error: No puede eliminar la última :type categoría!',
-        'invalid_token'     => 'Error: El token introducido es inválido!',
+        'change_type'       => 'Error: No se puede cambiar el tipo porque tiene :text relacionado!',
+        'invalid_apikey'    => 'Error: ¡La clave de API introducida no es válida!',
         'import_column'     => 'Error: :message Nombre de la hoja: :sheet. Número de línea: :line.',
         'import_sheet'      => 'Error: El nombre de la hoja no es válido. Por favor, verifique el archivo de ejemplo.',
     ],
@@ -27,6 +29,7 @@ return [
         'deleted'           => 'Advertencia: No puede borrar <b>:name</b> porque tiene :text relacionado.',
         'disabled'          => 'Advertencia: No se permite desactivar <b>:name</b> porque tiene :text relacionado.',
         'disable_code'      => 'Advertencia: No puede desactivar o cambiar la moneda <b>:name</b> porque tiene :text relacionado.',
+        'payment_cancel'    => 'Advertencia: Ha cancelado su reciente pago de :method!',
     ],
 
 ];

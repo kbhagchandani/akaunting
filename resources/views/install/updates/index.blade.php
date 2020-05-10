@@ -3,145 +3,95 @@
 @section('title', trans_choice('general.updates', 2))
 
 @section('new_button')
-<span class="new-button"><a href="{{ url('install/updates/check') }}" class="btn btn-default btn-sm"><span class="fa fa-history"></span> &nbsp;{{ trans('updates.check') }}</a></span>
+    <a href="{{ route('updates.check') }}" class="btn btn-white btn-sm header-button-top"><span class="fa fa-history"></span> &nbsp;{{ trans('updates.check') }}</a>
 @endsection
 
 @section('content')
-@if (!empty($core->errors))
-    @foreach($core->errors as $alias => $error)
-        @php $callout_class = ($alias == 'core_modules') ? 'callout-warning' : 'callout-danger'; @endphp
-        <div class="callout {{ $callout_class }}">
-            <p>{!! $error !!}</p>
+    <div class="card">
+        <div class="card-header">
+            <span class="table-text text-primary">Akaunting</span>
         </div>
-    @endforeach
-@endif
-@if (!empty($expires))
-    @foreach ($expires as $error)
-        <div class="callout callout-danger">
-            <p>{!! $error !!}</p>
+
+        <div class="card-body">
+            <div class="row">
+                @if (empty($core))
+                    <div class="col-md-12">
+                        {{ trans('updates.latest_core') }}
+                    </div>
+                @else
+                    <div class="col-sm-2 col-md-6 long-texts">
+                        {{ trans('updates.new_core') }}
+                    </div>
+                    <div class="col-sm-10 col-md-6 text-right">
+                        <a href="{{ route('updates.run', ['alias' => 'core', 'version' => $core]) }}"
+                            class="btn btn-info btn-sm header-button-top long-texts">
+                            <i class="fa fa-refresh"></i> &nbsp;{{ trans('updates.update', ['version' => $core]) }}
+                        </a>
+                        <button type="button" @click="onChangelog" class="btn btn-white btn-sm header-button-bottom">
+                            <i class="fa fa-exchange-alt"></i> &nbsp;{{ trans('updates.changelog') }}
+                        </button>
+                    </div>
+                @endif
+            </div>
         </div>
-    @endforeach
-@endif
-@if (!empty($requirements))
-    @foreach ($requirements as $error)
-        <div class="callout callout-danger">
-            <p>{!! $error !!}</p>
+    </div>
+
+    <div class="card">
+        <div class="card-header border-bottom-0">
+            {{ trans_choice('general.modules', 2) }}
         </div>
-    @endforeach
-@endif
-@if (empty($core->errors) && empty($expires) && empty($requirements))
-    <div class="callout callout-warning">
-        <p>It is <strong>HIGHLY RECOMMENDED</strong> that files and database are backed up prior to applying this MAJOR update.</p>
-    </div>
-@endif
 
-<!-- Default box -->
-<div class="box box-success">
-    <div class="box-header with-border">
-        <i class="fa fa-gear"></i>
-        <h3 class="box-title">Akaunting</h3>
-    </div>
-    <!-- /.box-header -->
-
-    <div class="box-body">
-        @if (empty($core))
-        {{ trans('updates.latest_core') }}
-        @else
-            @if (empty($core->errors) && empty($requirements))
-            {{ trans('updates.new_core') }}
-            &nbsp;&nbsp;<a href="{{ url('install/updates/update', ['alias' => 'core', 'version' => $core->data->latest]) }}" id="update" data-toggle="tooltip" title="{{ trans('updates.update', ['version' => $core->data->latest]) }}" class="btn btn-warning btn-xs"><i class="fa fa-refresh"></i> &nbsp;{{ trans('updates.update', ['version' => $core->data->latest]) }}</a>
-            <a href="{{ url('install/updates/changelog') }}" id="changelog" data-toggle="tooltip" title="{{ trans('updates.changelog') }}" class="btn btn-default btn-xs popup"><i class="fa fa-exchange"></i> &nbsp;{{ trans('updates.changelog') }}</a>
-            @else
-            {{ trans('updates.new_core') }}
-            &nbsp;&nbsp;
-            <button type="button" class="btn btn-warning btn-xs" disabled>
-                <i class="fa fa-refresh"></i> &nbsp;{{ trans('updates.update', ['version' => $core->data->latest]) }}
-            </button>
-            @if (empty($expires) && empty($requirements))
-            &nbsp;&nbsp;&nbsp;&nbsp;
-            <a href="{{ url('install/updates/update', ['alias' => 'core', 'version' => $core->data->latest]) }}" id="update" data-toggle="tooltip" title="WARNING: Files of not compatible apps will be deleted." class="btn btn-danger btn-xs"><i class="fa fa-warning"></i> &nbsp; FORCE UPDATE</a>
-            @endif
-            @endif
-        @endif
-    </div>
-    <!-- /.box-body -->
-
-</div>
-<!-- /.box -->
-
-<!-- Default box -->
-<div class="box box-success">
-    <div class="box-header with-border">
-        <i class="fa fa-rocket"></i>
-        <h3 class="box-title">{{ trans_choice('general.modules', 2) }}</h3>
-    </div>
-    <!-- /.box-header -->
-
-    <div class="box-body">
-        <div class="table table-responsive">
-            <table class="table table-striped table-hover" id="tbl-translations">
-                <thead>
-                    <tr>
-                        <th class="col-md-4">{{ trans('general.name') }}</th>
-                        <th class="col-md-2">{{ trans_choice('general.categories', 1) }}</th>
-                        <th class="col-md-2">{{ trans('updates.installed_version') }}</th>
-                        <th class="col-md-2">{{ trans('updates.latest_version') }}</th>
-                        <th class="col-md-2">{{ trans_choice('general.statuses', 1) }}</th>
+        <div class="table-responsive">
+            <table class="table table-flush table-hover" id="tbl-translations">
+                <thead class="thead-light">
+                    <tr class="row table-head-line">
+                        <th class="col-xs-4 col-sm-4 col-md-4">{{ trans('general.name') }}</th>
+                        <th class="col-md-2 d-none d-md-block">{{ trans_choice('general.categories', 1) }}</th>
+                        <th class="col-sm-3 col-md-2 d-none d-sm-block">{{ trans('updates.installed_version') }}</th>
+                        <th class="col-xs-4 col-sm-3 col-md-2">{{ trans('updates.latest_version') }}</th>
+                        <th class="col-xs-4 col-sm-2 col-md-2 text-center">{{ trans('general.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
-                @foreach($modules as $module)
-                    <tr>
-                        <td>{{ $module->name }}</td>
-                        <td>{{ $module->category }}</td>
-                        <td>{{ $module->installed }}</td>
-                        <td>{{ $module->latest }}</td>
-                        <td>
-                            @if (!empty($module->errors))
-                                <span class="label label-danger">{{ trans('general.not_compatible') }}</span>
-                            @else
-                                <span class="label label-success">{{ trans('general.avaible') }}</span>
-                            @endif
-                        </td>
-                    </tr>
-                @endforeach
+                    @if ($modules)
+                        @foreach($modules as $module)
+                            <tr class="row align-items-center border-top-1">
+                                <td class="col-xs-4 col-sm-4 col-md-4">{{ $module->name }}</td>
+                                <td class="col-md-2 d-none d-md-block">{{ $module->category }}</td>
+                                <td class="col-sm-3 col-md-2 d-none d-sm-block">{{ $module->installed }}</td>
+                                <td class="col-xs-4 col-md-2 col-sm-3">{{ $module->latest }}</td>
+                                <td class="col-xs-4 col-sm-2 col-md-2 text-center">
+                                    <a href="{{ route('updates.run', ['alias' => $module->alias, 'version' => $module->latest]) }}" class="btn btn-warning btn-sm">
+                                        <i class="fa fa-refresh" aria-hidden="true"></i> {{ trans_choice('general.updates', 1) }}
+                                    </a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    @else
+                        <tr class="row">
+                            <td class="col-12">
+                                <div class="text-sm text-muted" id="datatable-basic_info" role="status" aria-live="polite">
+                                    <small>{{ trans('general.no_records') }}</small>
+                                </div>
+                            </td>
+                        </tr>
+                    @endif
                 </tbody>
             </table>
         </div>
     </div>
-    <!-- /.box-body -->
 
-</div>
-<!-- /.box -->
+    <akaunting-modal v-if="changelog.show"
+        :show="changelog.show"
+        :title="'{{ trans('updates.changelog') }}'"
+        @cancel="changelog.show = false"
+        :message="changelog.html">
+        <template #card-footer>
+            <span></span>
+        </template>
+    </akaunting-modal>
 @endsection
 
-@push('stylesheet')
-    <style>
-        .loading-spin {
-            margin-left: 10px;
-            position: relative;
-            display: inline-block;
-            vertical-align: middle;
-        }
-    </style>
-@endpush
-
-@push('scripts')
-<script>
-    $(document).ready(function () {
-        $('#update').click(function(event) {
-            $(this).html('Updating Akaunting... Please, don\'t close this window!');
-            $(this).tooltip('disable');
-            $(this).removeClass('btn-xs');
-            $(this).removeClass('btn-warning');
-            $(this).addClass('btn-sm');
-            $(this).addClass('btn-danger');
-            $(this).after('<div class="loading-spin"><i class="fa fa-spinner fa-3x fa-spin fa-fw" aria-hidden="true"></i></div>');
-
-            $('#changelog').hide();
-
-            return true;
-        });
-    });
-</script>
+@push('scripts_start')
+    <script src="{{ asset('public/js/install/update.js?v=' . version('short')) }}"></script>
 @endpush

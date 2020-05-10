@@ -3,11 +3,10 @@
 namespace App\Models\Setting;
 
 use App\Scopes\Company;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Model as Eloquent;
 
-class Setting extends Model
+class Setting extends Eloquent
 {
-
     protected $table = 'settings';
 
     public $timestamps = false;
@@ -19,11 +18,6 @@ class Setting extends Model
      */
     protected $fillable = ['company_id', 'key', 'value'];
 
-    /**
-     * The "booting" method of the model.
-     *
-     * @return void
-     */
     protected static function boot()
     {
         parent::boot();
@@ -31,19 +25,22 @@ class Setting extends Model
         static::addGlobalScope(new Company);
     }
 
-    public static function all($code = 'general')
-    {
-        return static::where('key', 'like', $code . '.%')->get();
-    }
-
-    /**
-     * Global company relation.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
     public function company()
     {
         return $this->belongsTo('App\Models\Common\Company');
+    }
+
+    /**
+     * Scope to only include by prefix.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $prefix
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopePrefix($query, $prefix = 'company')
+    {
+        return $query->where('key', 'like', $prefix . '.%');
     }
 
     /**

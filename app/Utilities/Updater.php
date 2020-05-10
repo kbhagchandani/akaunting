@@ -2,16 +2,17 @@
 
 namespace App\Utilities;
 
-use App\Models\Module\Module as ModuleModel;
-use App\Traits\SiteApi;
+use App\Events\Install\UpdateCopied;
+use App\Events\Install\UpdateDownloaded;
+use App\Events\Install\UpdateUnzipped;
+use App\Models\Module\Module;
 use App\Utilities\Console;
+use App\Traits\SiteApi;
 use Artisan;
 use Cache;
 use Date;
 use File;
-use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Str;
-use Module;
 use ZipArchive;
 
 class Updater
@@ -36,14 +37,10 @@ class Updater
         if ($alias == 'core') {
             $url = 'core/download/' . $new . '/' . $info['php'] . '/' . $info['mysql'];
         } else {
-            $url = 'apps/' . $alias . '/download/' . $new . '/' . $info['akaunting'] . '/' . $info['token'];
+            $url = 'apps/' . $alias . '/download/' . $new . '/' . $info['akaunting'] . '/' . $info['api_key'];
         }
 
-        $response = static::getRemote($url, ['timeout' => 50, 'track_redirects' => true]);
-
-        // Exception
-        if (!$response || ($response instanceof RequestException) || ($response->getStatusCode() != 200)) {
-            \Log::info(trans('modules.errors.download', ['module' => $alias]));
+        if (!$response = static::getResponse('GET', $url, ['timeout' => 50, 'track_redirects' => true])) {
             throw new \Exception(trans('modules.errors.download', ['module' => $alias]));
         }
 
@@ -66,6 +63,8 @@ class Updater
             throw new \Exception(trans('modules.errors.zip', ['module' => $alias]));
         }
 
+        event(new UpdateDownloaded($alias, $new, $old));
+
         return $path;
     }
 
@@ -87,6 +86,8 @@ class Updater
         // Delete zip file
         File::delete($file);
 
+        event(new UpdateUnzipped($alias, $new, $old));
+
         return $path;
     }
 
@@ -95,31 +96,12 @@ class Updater
         $temp_path = storage_path('app/temp') . '/' . $path;
 
         if ($alias == 'core') {
-            $directories = [
-                'vendor/santigarcor/laratrust/src/commands',
-            ];
-
-            foreach ($directories as $directory) {
-                File::deleteDirectory(base_path($directory));
-            }
-
             // Move all files/folders from temp path
             if (!File::copyDirectory($temp_path, base_path())) {
                 throw new \Exception(trans('modules.errors.file_copy', ['module' => $alias]));
             }
-
-            $directories = [
-                'vendor/maatwebsite/excel/src/Maatwebsite',
-                'vendor/santigarcor/laratrust/src/config',
-                'vendor/santigarcor/laratrust/src/Laratrust',
-                'vendor/santigarcor/laratrust/src/views',
-            ];
-
-            foreach ($directories as $directory) {
-                File::deleteDirectory(base_path($directory));
-            }
         } else {
-            if ($module = Module::findByAlias($alias)) {
+            if ($module = module($alias)) {
                 $module_path = $module->getPath();
             } else {
                 $module_path = base_path('modules/' . Str::studly($alias));
@@ -139,6 +121,8 @@ class Updater
         // Delete temp directory
         File::deleteDirectory($temp_path);
 
+        event(new UpdateCopied($alias, $new, $old));
+
         return $path;
     }
 
@@ -147,18 +131,15 @@ class Updater
         if ($alias == 'core') {
             $companies = [session('company_id')];
         } else {
-            $companies = ModuleModel::alias($alias)->where('company_id', '<>', '0')->pluck('company_id')->toArray();
+            $companies = Module::alias($alias)->where('company_id', '<>', '0')->pluck('company_id')->toArray();
         }
 
         foreach ($companies as $company) {
             $command = "php artisan update:finish {$alias} {$company} {$new} {$old}";
 
-            \Log::info("Running finish command for {$alias} update...");
+            if (true !== $result = Console::run($command)) {
+                $message = !empty($result) ? $result : trans('modules.errors.finish', ['module' => $alias]);
 
-            if (true !== $result = Console::run($command, true)) {
-                $message = !empty($result) ? $result : "Not able to finalize {$alias} update";
-
-                \Log::info($message);
                 throw new \Exception($message);
             }
         }
@@ -167,40 +148,30 @@ class Updater
     public static function all()
     {
         // Get data from cache
-        $data = Cache::get('updates');
+        $updates = Cache::get('updates');
 
-        if (!empty($data)) {
-            return $data;
+        if (!empty($updates)) {
+            return $updates;
         }
 
-        // No data in cache, grab them from remote
-        $data = array();
+        $updates = [];
 
-        $modules = Module::all();
+        $modules = module()->all();
 
-        $versions = Versions::latest($modules);
+        $versions = Versions::all($modules);
 
-        foreach ($versions as $alias => $version) {
-            if (empty($version->data)) {
+        foreach ($versions as $alias => $latest_version) {
+            $installed_version = ($alias == 'core') ? version('short') : module($alias)->get('version');
+
+            if (version_compare($installed_version, $latest_version, '>=')) {
                 continue;
             }
 
-            if ($alias == 'core') {
-                $installed_version = version('short');
-            } else {
-                $module = Module::findByAlias($alias);
-                $installed_version = $module->get('version');
-            }
-
-            if (version_compare($installed_version, $version->data->latest, '>=')) {
-                continue;
-            }
-
-            $data[$alias] = $version;
+            $updates[$alias] = $latest_version;
         }
 
-        Cache::put('updates', $data, Date::now()->addHour(6));
+        Cache::put('updates', $updates, Date::now()->addHour(6));
 
-        return $data;
+        return $updates;
     }
 }

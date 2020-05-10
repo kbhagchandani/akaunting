@@ -29,6 +29,7 @@ return [
     'add_payment'           => 'Shto Pagesë',
     'mark_paid'             => 'Shënoje të Paguar',
     'mark_sent'             => 'Shënoje të Dërguar',
+    'mark_viewed'           => 'Shënoje të Shikuar',
     'download_pdf'          => 'Shkarko PDF',
     'send_mail'             => 'Dërgo Email',
     'all_invoices'          => 'Identifikohu për të parë të gjitha faturat',
@@ -37,23 +38,27 @@ return [
     'get_paid'              => 'Merre Pagesen',
     'accept_payments'       => 'Pranoni Pagesat Online',
 
-    'status' => [
+    'statuses' => [
         'draft'             => 'Draft',
         'sent'              => 'E Dërguar',
         'viewed'            => 'E Shikuar',
         'approved'          => 'I Miratuar',
         'partial'           => 'I pjesshëm',
         'paid'              => 'I paguar',
+        'overdue'           => 'I vonuar',
+        'unpaid'            => 'I papaguar',
     ],
 
     'messages' => [
-        'email_sent'        => 'Emaili i faturës është dërguar me sukses!',
-        'marked_sent'       => 'Fatura shënohet si e dërguar me sukses!',
+        'email_sent'        => 'Emaili i faturës është dërguar!',
+        'marked_sent'       => 'Fatura e shënuar si e dërguar!',
+        'marked_paid'       => 'Fatura e shënuar si e paguar!',
         'email_required'    => 'Ska adresë e-mail për këtë klient!',
         'draft'             => 'Kjo është një faturë <b>DRAFT</b> dhe do të pasqyrohet në skema pasi të jetë dërguar.',
 
         'status' => [
             'created'       => 'Krijuar më :date',
+            'viewed'        => 'E Shikuar',
             'send' => [
                 'draft'     => 'Nuk është dërguar',
                 'sent'      => 'Dërguar më :date',
@@ -62,11 +67,6 @@ return [
                 'await'     => 'Duke pritur pagesen',
             ],
         ],
-    ],
-
-    'notification' => [
-        'message'           => 'Ju po merrni këtë email sepse keni një të ardhshme :amount fature e :customer klientit.',
-        'button'            => 'Paguaj Tani',
     ],
 
 ];

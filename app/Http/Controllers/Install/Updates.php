@@ -2,19 +2,15 @@
 
 namespace App\Http\Controllers\Install;
 
-use App\Http\Controllers\Controller;
-use App\Utilities\Console;
+use App\Abstracts\Http\Controller;
 use App\Utilities\Updater;
 use App\Utilities\Versions;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\File;
-use Module;
 
 class Updates extends Controller
 {
     /**
-     * Show the form for creating a new resource.
+     * Display a listing of the resource.
      *
      * @return Response
      */
@@ -23,20 +19,14 @@ class Updates extends Controller
         $updates = Updater::all();
 
         $core = null;
-        $expires = null;
 
-        $modules = [];
+        $modules = array();
 
         if (isset($updates['core'])) {
             $core = $updates['core'];
-
-            if (!empty($core->errors) && !empty($core->errors->expires)) {
-                $expires = $core->errors->expires;
-                unset($core->errors->expires);
-            }
         }
 
-        $rows = Module::all();
+        $rows = module()->all();
 
         if ($rows) {
             foreach ($rows as $row) {
@@ -46,41 +36,18 @@ class Updates extends Controller
                     continue;
                 }
 
-                $update = $updates[$alias];
-
                 $m = new \stdClass();
-                $m->name = $row->get('name');
+                $m->name = $row->getName();
                 $m->alias = $row->get('alias');
                 $m->category = $row->get('category');
                 $m->installed = $row->get('version');
-                $m->latest = $update->data->latest;
-                $m->errors = !empty($update->errors) ? $update->errors->$alias : $update->errors;
+                $m->latest = $updates[$alias];
 
                 $modules[] = $m;
             }
         }
 
-        $requirements = [];
-
-        $hosting = ' Ask your hosting provider for further help.';
-
-        if (!extension_loaded('bcmath')) {
-            $requirements[] = trans('install.requirements.extension', ['extension' => 'BCMath']) . $hosting;
-        }
-
-        if (!extension_loaded('ctype')) {
-            $requirements[] = trans('install.requirements.extension', ['extension' => 'Ctype']) . $hosting;
-        }
-
-        if (!extension_loaded('json')) {
-            $requirements[] = trans('install.requirements.extension', ['extension' => 'JSON']) . $hosting;
-        }
-
-        if (Console::run('php artisan help') !== true) {
-            $requirements[] = 'The PHP CLI executable file is not working! Please, ask your hosting company to set PHP_BINARY or PHP_PATH environment variable correctly.';
-        }
-
-        return view('install.updates.index', compact('core', 'modules', 'expires', 'requirements'));
+        return view('install.updates.index', compact('core', 'modules'));
     }
 
     public function changelog()
@@ -102,25 +69,185 @@ class Updates extends Controller
     }
 
     /**
+     * Run the update.
+     *
+     * @param  $alias
+     * @param  $version
+     * @return Response
+     */
+    public function run($alias, $version)
+    {
+        if ($alias == 'core') {
+            $name = 'Akaunting ' . $version;
+
+            $installed = version('short');
+        } else {
+            // Get module instance
+            $module = module($alias);
+
+            $name = $module->getName();
+
+            $installed = $module->get('version');
+        }
+
+        return view('install.updates.edit', compact('alias', 'name', 'installed', 'version'));
+    }
+
+    /**
      * Show the form for viewing the specified resource.
      *
      * @param  $request
      *
      * @return Response
      */
-    public function migrate(Request $request)
+    public function steps(Request $request)
     {
-        Artisan::call('cache:clear');
+        $steps = [];
+
+        $name = $request['name'];
+
+        // Download
+        $steps[] = [
+            'text' => trans('modules.installation.download', ['module' => $name]),
+            'url'  => route('updates.download'),
+        ];
+
+        // Unzip
+        $steps[] = [
+            'text' => trans('modules.installation.unzip', ['module' => $name]),
+            'url'  => route('updates.unzip'),
+        ];
+
+        // Copy files
+        $steps[] = [
+            'text' => trans('modules.installation.file_copy', ['module' => $name]),
+            'url'  => route('updates.copy'),
+        ];
+
+        // Finish/Apply
+        $steps[] = [
+            'text' => trans('modules.installation.finish', ['module' => $name]),
+            'url'  => route('updates.finish'),
+        ];
+
+        // Redirect
+        $steps[] = [
+            'text' => trans('modules.installation.redirect', ['module' => $name]),
+            'url'  => route('updates.redirect'),
+        ];
 
         return response()->json([
             'success' => true,
-            'errors' => false,
-            'data' => [],
+            'error' => false,
+            'data' => $steps,
+            'message' => null
         ]);
     }
 
     /**
-     * Show the form for viewing the specified resource.
+     * Download the file
+     *
+     * @param  $request
+     *
+     * @return Response
+     */
+    public function download(Request $request)
+    {
+        set_time_limit(900); // 15 minutes
+
+        try {
+            $path = Updater::download($request['alias'], $request['version'], $request['installed']);
+
+            $json = [
+                'success' => true,
+                'error' => false,
+                'message' => null,
+                'data' => [
+                    'path' => $path,
+                ],
+            ];
+        } catch (\Exception $e) {
+            $json = [
+                'success' => false,
+                'error' => true,
+                'message' => $e->getMessage(),
+                'data' => [],
+            ];
+        }
+
+        return response()->json($json);
+    }
+
+    /**
+     * Unzip the downloaded file
+     *
+     * @param  $request
+     *
+     * @return Response
+     */
+    public function unzip(Request $request)
+    {
+        set_time_limit(900); // 15 minutes
+
+        try {
+            $path = Updater::unzip($request['path'], $request['alias'], $request['version'], $request['installed']);
+
+            $json = [
+                'success' => true,
+                'error' => false,
+                'message' => null,
+                'data' => [
+                    'path' => $path,
+                ],
+            ];
+        } catch (\Exception $e) {
+            $json = [
+                'success' => false,
+                'error' => true,
+                'message' => $e->getMessage(),
+                'data' => [],
+            ];
+        }
+
+        return response()->json($json);
+    }
+
+    /**
+     * Copy files
+     *
+     * @param  $request
+     *
+     * @return Response
+     */
+    public function copyFiles(Request $request)
+    {
+        set_time_limit(900); // 15 minutes
+
+        try {
+            $path = Updater::copyFiles($request['path'], $request['alias'], $request['version'], $request['installed']);
+
+            $json = [
+                'success' => true,
+                'error' => false,
+                'message' => null,
+                'data' => [
+                    'path' => $path,
+                ],
+            ];
+        } catch (\Exception $e) {
+            $json = [
+                'success' => false,
+                'error' => true,
+                'message' => $e->getMessage(),
+                'data' => [],
+            ];
+        }
+
+        return response()->json($json);
+    }
+
+    /**
+     * Finish the update
      *
      * @param  $request
      *
@@ -128,89 +255,45 @@ class Updates extends Controller
      */
     public function finish(Request $request)
     {
-        return response()->json([
-            'success' => true,
-            'errors' => false,
-            'redirect' => url("install/updates"),
-            'data' => [],
-        ]);
+        set_time_limit(900); // 15 minutes
+
+        try {
+            Updater::finish($request['alias'], $request['version'], $request['installed']);
+
+            $json = [
+                'success' => true,
+                'error' => false,
+                'message' => null,
+                'data' => [],
+            ];
+        } catch (\Exception $e) {
+            $json = [
+                'success' => false,
+                'error' => true,
+                'message' => $e->getMessage(),
+                'data' => [],
+            ];
+        }
+
+        return response()->json($json);
     }
 
     /**
-     * Update the core or modules.
+     * Redirect back
      *
-     * @param  $alias
-     * @param  $version
+     * @param  $request
+     *
      * @return Response
      */
-    public function update($alias, $version)
+    public function redirect()
     {
-        set_time_limit(0); // unlimited
+        $json = [
+            'success' => true,
+            'errors' => false,
+            'redirect' => route('updates.index'),
+            'data' => [],
+        ];
 
-        $core_modules = ['offlinepayment', 'paypalstandard'];
-
-        $modules = Module::all();
-        $versions = Versions::latest($modules);
-
-        // Delete module files
-        foreach ($modules as $module) {
-            $alias = $module->getAlias();
-
-            if (in_array($alias, $core_modules)) {
-                continue;
-            }
-
-            File::deleteDirectory($module->getPath());
-        }
-
-        // Update core
-        if ($this->applyUpdate('core', $version) !== true) {
-            $message = 'Not able to update core from UI';
-            \Log::info($message);
-
-            return redirect('install/updates');
-        }
-
-        // Update modules
-        foreach ($modules as $module) {
-            $alias = $module->get('alias');
-
-            if (in_array($alias, $core_modules)) {
-                continue;
-            }
-
-            if (!empty($versions[$alias]->errors)) {
-                continue;
-            }
-
-            if ($this->applyUpdate($alias, $versions[$alias]->data->latest) !== true) {
-                $message = 'Not able to update ' . $alias . ' from UI';
-                \Log::info($message);
-
-                return redirect('install/updates');
-            }
-        }
-
-        return redirect('/');
-    }
-
-    protected function applyUpdate($alias, $version)
-    {
-        $company_id = session('company_id');
-
-        $command = "php artisan update {$alias} {$company_id} {$version}";
-
-        if (true !== $result = Console::run($command, true)) {
-            $message = !empty($result) ? $result : trans('modules.errors.finish', ['module' => $alias]);
-
-            flash($message)->error();
-            \Log::info($message);
-
-            if ($alias == 'core') {
-                return false;
-            }
-        }
-
-        return true;
+        return response()->json($json);
     }
 }

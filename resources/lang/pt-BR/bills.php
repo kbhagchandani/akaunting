@@ -35,16 +35,18 @@ return [
     'receive_bill'          => 'Receber fatura',
     'make_payment'          => 'Fazer pagamento',
 
-    'status' => [
+    'statuses' => [
         'draft'             => 'Rascunho',
         'received'          => 'Recebido',
         'partial'           => 'Parcial',
         'paid'              => 'Pago',
+        'overdue'           => 'Vencido',
+        'unpaid'            => 'Não Pago',
     ],
 
     'messages' => [
         'received'          => 'Conta marcada como recebida com sucesso!',
-        'draft'             => 'This is a <b>DRAFT</b> bill and will be reflected to charts after it gets received.',
+        'draft'             => 'Este é um <b>RASCUNHO</b> de fatura e será refletida nos gráficos depois que ela for recebida.',
 
         'status' => [
             'created'       => 'Criado em :date',

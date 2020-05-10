@@ -35,11 +35,13 @@ return [
     'receive_bill'          => 'Saņemt rēķinu',
     'make_payment'          => 'Veikt maksājumu',
 
-    'status' => [
-        'draft'             => 'Melnraksts',
-        'received'          => 'Saņemts',
-        'partial'           => 'Daļējs',
-        'paid'              => 'Samaksāts',
+    'statuses' => [
+        'draft'             => 'Draft',
+        'received'          => 'Received',
+        'partial'           => 'Partial',
+        'paid'              => 'Paid',
+        'overdue'           => 'Overdue',
+        'unpaid'            => 'Unpaid',
     ],
 
     'messages' => [

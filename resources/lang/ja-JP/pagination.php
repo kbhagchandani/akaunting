@@ -2,8 +2,9 @@
 
 return [
 
-    'previous'              => '&laquo; 前',
-    'next'                  => '次 &raquo;',
-    'showing'               => '表示：最初：最後：最後：合計：タイプ',
+    'previous'              => '戻る',
+    'next'                  => '次',
+    'showing'               => ':first-:last of :total records.',
+    'page'                  => 'ページあたり',
 
 ];

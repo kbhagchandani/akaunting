@@ -2,7 +2,7 @@
 
 namespace App\Models\Setting;
 
-use App\Models\Model;
+use App\Abstracts\Model;
 
 class Category extends Model
 {
@@ -24,12 +24,22 @@ class Category extends Model
 
     public function bills()
     {
-        return $this->hasMany('App\Models\Expense\Bill');
+        return $this->hasMany('App\Models\Purchase\Bill');
+    }
+
+    public function expense_transactions()
+    {
+        return $this->transactions()->where('type', 'expense');
+    }
+
+    public function income_transactions()
+    {
+        return $this->transactions()->where('type', 'income');
     }
 
     public function invoices()
     {
-        return $this->hasMany('App\Models\Income\Invoice');
+        return $this->hasMany('App\Models\Sale\Invoice');
     }
 
     public function items()
@@ -37,26 +47,30 @@ class Category extends Model
         return $this->hasMany('App\Models\Common\Item');
     }
 
-    public function payments()
+    public function transactions()
     {
-        return $this->hasMany('App\Models\Expense\Payment');
-    }
-
-    public function revenues()
-    {
-        return $this->hasMany('App\Models\Income\Revenue');
+        return $this->hasMany('App\Models\Banking\Transaction');
     }
 
     /**
      * Scope to only include categories of a given type.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param mixed $type
+     * @param mixed $types
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeType($query, $type)
+    public function scopeType($query, $types)
     {
-        return $query->whereIn('type', (array) $type);
+        if (empty($types)) {
+            return $query;
+        }
+
+        return $query->whereIn($this->table . '.type', (array) $types);
+    }
+
+    public function scopeName($query, $name)
+    {
+        return $query->where('name', '=', $name);
     }
 
     /**

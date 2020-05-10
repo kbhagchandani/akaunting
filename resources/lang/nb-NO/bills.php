@@ -35,11 +35,13 @@ return [
     'receive_bill'          => 'Motta faktura',
     'make_payment'          => 'Opprett betaling',
 
-    'status' => [
-        'draft'             => 'Utkast',
+    'statuses' => [
+        'draft'             => 'Kladd',
         'received'          => 'Mottatt',
         'partial'           => 'Delvis',
         'paid'              => 'Betalt',
+        'overdue'           => 'Forfalt',
+        'unpaid'            => 'Ubetalt',
     ],
 
     'messages' => [

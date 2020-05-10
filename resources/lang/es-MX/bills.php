@@ -7,7 +7,7 @@ return [
     'total_price'           => 'Precio Total',
     'due_date'              => 'Fecha de Vencimiento',
     'order_number'          => 'Número de Orden',
-    'bill_from'             => 'Recibo De',
+    'bill_from'             => 'Factura de',
 
     'quantity'              => 'Cantidad',
     'price'                 => 'Precio',
@@ -35,11 +35,13 @@ return [
     'receive_bill'          => 'Recibir Recibo',
     'make_payment'          => 'Hacer Pago',
 
-    'status' => [
+    'statuses' => [
         'draft'             => 'Borrador',
         'received'          => 'Recibido',
         'partial'           => 'Parcial',
         'paid'              => 'Pagado',
+        'overdue'           => 'Vencido',
+        'unpaid'            => 'No Pagado',
     ],
 
     'messages' => [

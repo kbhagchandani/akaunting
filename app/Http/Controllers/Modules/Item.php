@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers\Modules;
 
-use App\Http\Controllers\Controller;
+use App\Abstracts\Http\Controller;
 use App\Models\Module\Module;
 use App\Models\Module\ModuleHistory;
 use App\Traits\Modules;
-use Artisan;
-use Module as LModule;
 use Illuminate\Http\Request;
 
 class Item extends Controller
@@ -34,8 +32,6 @@ class Item extends Controller
      */
     public function show($alias)
     {
-        $this->checkApiToken();
-
         $enable = false;
         $installed = false;
 
@@ -48,7 +44,7 @@ class Item extends Controller
         if ($this->moduleExists($alias) && ($model = Module::alias($alias)->first())) {
             $installed = true;
 
-            if ($model->status) {
+            if ($model->enabled) {
                 $enable = true;
             }
         }
@@ -81,33 +77,34 @@ class Item extends Controller
      */
     public function steps(Request $request)
     {
-        $this->checkApiToken();
-
-        $json = [];
-        $json['step'] = [];
+        $steps = [];
 
         $name = $request['name'];
-        $version = $request['version'];
 
         // Download
-        $json['step'][] = [
+        $steps[] = [
             'text' => trans('modules.installation.download', ['module' => $name]),
             'url'  => url('apps/download')
         ];
 
         // Unzip
-        $json['step'][] = [
+        $steps[] = [
             'text' => trans('modules.installation.unzip', ['module' => $name]),
             'url'  => url('apps/unzip')
         ];
 
         // Download
-        $json['step'][] = [
+        $steps[] = [
             'text' => trans('modules.installation.install', ['module' => $name]),
             'url'  => url('apps/install')
         ];
 
-        return response()->json($json);
+        return response()->json([
+            'success' => true,
+            'error' => false,
+            'data' => $steps,
+            'message' => null
+        ]);
     }
 
     /**
@@ -119,13 +116,11 @@ class Item extends Controller
      */
     public function download(Request $request)
     {
-        $this->checkApiToken();
-
         $path = $request['path'];
 
         $version = $request['version'];
 
-        $path .= '/' . $version . '/' . version('short') . '/' . setting('general.api_token');
+        $path .= '/' . $version . '/' . version('short') . '/' . setting('apps.api_key');
 
         $json = $this->downloadModule($path);
 
@@ -141,8 +136,6 @@ class Item extends Controller
      */
     public function unzip(Request $request)
     {
-        $this->checkApiToken();
-
         $path = $request['path'];
 
         $json = $this->unzipModule($path);
@@ -159,8 +152,6 @@ class Item extends Controller
      */
     public function install(Request $request)
     {
-        $this->checkApiToken();
-
         $path = $request['path'];
 
         $json = $this->installModule($path);
@@ -176,8 +167,6 @@ class Item extends Controller
 
     public function uninstall($alias)
     {
-        $this->checkApiToken();
-
         $json = $this->uninstallModule($alias);
 
         $module = Module::alias($alias)->first();
@@ -203,8 +192,6 @@ class Item extends Controller
 
     public function update($alias)
     {
-        $this->checkApiToken();
-
         $json = $this->updateModule($alias);
 
         $module = Module::alias($alias)->first();
@@ -228,8 +215,6 @@ class Item extends Controller
 
     public function enable($alias)
     {
-        $this->checkApiToken();
-
         $json = $this->enableModule($alias);
 
         $module = Module::alias($alias)->first();
@@ -242,7 +227,7 @@ class Item extends Controller
             'description' => trans('modules.enabled', ['module' => $json['data']['name']]),
         ];
 
-        $module->status = 1;
+        $module->enabled = 1;
 
         $module->save();
 
@@ -257,8 +242,6 @@ class Item extends Controller
 
     public function disable($alias)
     {
-        $this->checkApiToken();
-
         $json = $this->disableModule($alias);
 
         $module = Module::alias($alias)->first();
@@ -271,7 +254,7 @@ class Item extends Controller
             'description' => trans('modules.disabled', ['module' => $json['data']['name']]),
         ];
 
-        $module->status = 0;
+        $module->enabled = 0;
 
         $module->save();
 
@@ -282,25 +265,6 @@ class Item extends Controller
         flash($message)->success();
 
         return redirect('apps/' . $alias)->send();
-    }
-
-    /**
-     * Final actions post update.
-     *
-     * @param  $alias
-     * @return Response
-     */
-    public function post($alias)
-    {
-        Artisan::call('module:install', ['alias' => $alias, 'company_id' => session('company_id')]);
-
-        $module = LModule::findByAlias($alias);
-
-        $message = trans('modules.installed', ['module' => $module->get('name')]);
-
-        flash($message)->success();
-
-        return redirect('apps/' . $alias);
     }
 
     public function reviews($alias, Request $request)
@@ -328,8 +292,6 @@ class Item extends Controller
 
     public function documentation($alias)
     {
-        $this->checkApiToken();
-
         $documentation = $this->getDocumentation($alias);
 
         if (empty($documentation)) {

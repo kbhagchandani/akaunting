@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Utilities\Updater;
 use App\Utilities\Versions;
 use Illuminate\Console\Command;
-use Module;
 
 class Update extends Command
 {
@@ -32,14 +31,6 @@ class Update extends Command
      * @var string
      */
     protected $description = 'Allows to update Akaunting and modules directly through CLI';
-    
-    /**
-     * Create a new command instance.
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
 
     /**
      * Execute the console command.
@@ -48,11 +39,15 @@ class Update extends Command
      */
     public function handle()
     {
-        set_time_limit(0); // unlimited
+        set_time_limit(3600); // 1 hour
 
         $this->alias = $this->argument('alias');
 
-        $this->new = $this->getNewVersion();
+        if (false === $this->new = $this->getNewVersion()) {
+            $this->error('Not able to get the latest version of ' . $this->alias . '!');
+
+            return self::CMD_ERROR;
+        }
 
         $this->old = $this->getOldVersion();
 
@@ -80,15 +75,7 @@ class Update extends Command
 
     public function getNewVersion()
     {
-        $new = $this->argument('new');
-
-        if ($new == 'latest') {
-            $modules = ($this->alias == 'core') ? [] : [$this->alias];
-
-            $new = Versions::latest($modules)[$this->alias]->data->latest;
-        }
-
-        return $new;
+        return ($this->argument('new') == 'latest') ? Versions::latest($this->alias) : $this->argument('new');
     }
 
     public function getOldVersion()
@@ -97,7 +84,7 @@ class Update extends Command
             return version('short');
         }
 
-        if ($module = Module::findByAlias($this->alias)) {
+        if ($module = module($this->alias)) {
             return $module->get('version');
         }
 
@@ -106,8 +93,7 @@ class Update extends Command
 
     public function download()
     {
-        $this->info('Downloading ' . $this->alias . ' update...');
-        \Log::info('Downloading ' . $this->alias . ' update...');
+        $this->info('Downloading update...');
 
         try {
             $path = Updater::download($this->alias, $this->new, $this->old);
@@ -122,8 +108,7 @@ class Update extends Command
 
     public function unzip($path)
     {
-        $this->info('Unzipping ' . $this->alias . ' update...');
-        \Log::info('Unzipping ' . $this->alias . ' update...');
+        $this->info('Unzipping update...');
 
         try {
             Updater::unzip($path, $this->alias, $this->new, $this->old);
@@ -138,8 +123,7 @@ class Update extends Command
 
     public function copyFiles($path)
     {
-        $this->info('Copying ' . $this->alias . ' update files...');
-        \Log::info('Copying ' . $this->alias . ' update files...');
+        $this->info('Copying update files...');
 
         try {
             Updater::copyFiles($path, $this->alias, $this->new, $this->old);
@@ -154,8 +138,7 @@ class Update extends Command
 
     public function finish()
     {
-        $this->info('Finishing ' . $this->alias . ' update...');
-        \Log::info('Finishing ' . $this->alias . ' update...');
+        $this->info('Finishing update...');
 
         try {
             Updater::finish($this->alias, $this->new, $this->old);

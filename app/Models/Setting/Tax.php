@@ -2,11 +2,10 @@
 
 namespace App\Models\Setting;
 
-use App\Models\Model;
+use App\Abstracts\Model;
 
 class Tax extends Model
 {
-
     protected $table = 'taxes';
 
     /**
@@ -37,12 +36,22 @@ class Tax extends Model
 
     public function bill_items()
     {
-        return $this->hasMany('App\Models\Expense\BillItemTax');
+        return $this->hasMany('App\Models\Purchase\BillItemTax');
     }
 
     public function invoice_items()
     {
-        return $this->hasMany('App\Models\Income\InvoiceItemTax');
+        return $this->hasMany('App\Models\Sale\InvoiceItemTax');
+    }
+
+    public function scopeName($query, $name)
+    {
+        return $query->where('name', '=', $name);
+    }
+
+    public function scopeRate($query, $rate)
+    {
+        return $query->where('rate', '=', $rate);
     }
 
     /**
@@ -65,12 +74,11 @@ class Tax extends Model
     {
         $title = $this->name . ' (';
 
-        if (setting('general.percent_position', 'after') == 'after') {
-            $title .= $this->rate . '%';
+        if (setting('localisation.percent_position', 'after') == 'after') {
+            $title .= $this->getAttribute('type') == 'fixed' ?  $this->rate : $this->rate . '%';
         } else {
-            $title .= '%' . $this->rate;
+            $title .= $this->getAttribute('type') == 'fixed' ?  $this->rate : '%' . $this->rate;
         }
-
         $title .= ')';
 
         return $title;

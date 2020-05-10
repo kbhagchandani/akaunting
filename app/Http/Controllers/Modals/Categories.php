@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Modals;
 
-use App\Http\Controllers\Controller;
+use App\Abstracts\Http\Controller;
+use App\Jobs\Setting\CreateCategory;
+use Illuminate\Http\Request as IRequest;
 use App\Http\Requests\Setting\Category as Request;
-use Illuminate\Http\Request as CRequest;
-use App\Models\Setting\Category;
 
 class Categories extends Controller
 {
@@ -26,19 +26,11 @@ class Categories extends Controller
      *
      * @return Response
      */
-    public function create(CRequest $request)
+    public function create(IRequest $request)
     {
-        $type = $request['type'];
+        $type = $request->get('type', 'item');
 
-        $category_selector = false;
-
-        if (request()->has('category_selector')) {
-            $category_selector = request()->get('category_selector');
-        }
-
-        $rand = rand();
-
-        $html = view('modals.categories.create', compact('currencies', 'type', 'category_selector', 'rand'))->render();
+        $html = view('modals.categories.create', compact('type'))->render();
 
         return response()->json([
             'success' => true,
@@ -58,17 +50,15 @@ class Categories extends Controller
     public function store(Request $request)
     {
         $request['enabled'] = 1;
+        $request['type'] = $request->get('type', 'income');
+        $request['color'] = $request->get('color', '#' . dechex(rand(0x000000, 0xFFFFFF)));
 
-        $category = Category::create($request->all());
+        $response = $this->ajaxDispatch(new CreateCategory($request));
 
-        $message = trans('messages.success.added', ['type' => trans_choice('general.categories', 1)]);
+        if ($response['success']) {
+            $response['message'] = trans('messages.success.added', ['type' => trans_choice('general.categories', 1)]);
+        }
 
-        return response()->json([
-            'success' => true,
-            'error' => false,
-            'data' => $category,
-            'message' => $message,
-            'html' => 'null',
-        ]);
+        return response()->json($response);
     }
 }

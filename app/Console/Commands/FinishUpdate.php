@@ -2,7 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Events\UpdateFinished;
+use App\Events\Install\UpdateFinished;
+use App\Models\Common\Company;
 use Illuminate\Console\Command;
 
 class FinishUpdate extends Command
@@ -22,38 +23,36 @@ class FinishUpdate extends Command
     protected $description = 'Finish the update process through CLI';
 
     /**
-     * Create a new command instance.
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Execute the console command.
      *
      * @return mixed
      */
     public function handle()
     {
-        set_time_limit(0); // unlimited
+        set_time_limit(3600); // 1 hour
+
+        $this->info('Finishing update...');
 
         $this->call('cache:clear');
-        
+
         $alias = $this->argument('alias');
         $company_id = $this->argument('company');
         $new = $this->argument('new');
         $old = $this->argument('old');
 
-        $this->info('Finishing ' . $alias . ' update command...');
-        \Log::info('Finishing ' . $alias . ' update command...');
+        // Check if file mirror was successful
+        $version = ($alias == 'core') ? version('short') : module($alias)->get('version');
+        if ($version != $new) {
+            throw new \Exception(trans('modules.errors.finish', ['module' => $alias]));
+        }
 
-        // Check if the file mirror was successful
-        if (($alias == 'core') && (version('short') != $new)) {
-            $message = "Not able to finalize {$alias} installation";
-            $this->error($message);
-            \Log::info($message);
-            throw new \Exception($message);
+        // Set locale for modules
+        if ($alias != 'core') {
+            $company = Company::find($company_id);
+
+            if (!empty($company->locale)) {
+                app()->setLocale($company->locale);
+            }
         }
 
         session(['company_id' => $company_id]);
@@ -62,6 +61,6 @@ class FinishUpdate extends Command
         // Disable model cache during update
         config(['laravel-model-caching.enabled' => false]);
 
-        event(new UpdateFinished($alias, $old, $new));
+        event(new UpdateFinished($alias, $new, $old));
     }
 }

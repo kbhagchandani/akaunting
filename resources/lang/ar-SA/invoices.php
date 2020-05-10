@@ -26,47 +26,47 @@ return [
     'paid'                  => 'مدفوع',
     'histories'             => 'سجلات',
     'payments'              => 'المدفوعات',
-    'add_payment'           => 'إضافة مدفوعات',
+    'add_payment'           => 'إضافة الدفع',
     'mark_paid'             => 'التحديد كمدفوع',
     'mark_sent'             => 'التحديد كمرسل',
+    'mark_viewed'           => 'وضع علامة مشاهدة',
     'download_pdf'          => 'تحميل PDF',
     'send_mail'             => 'إرسال بريد إلكتروني',
-    'all_invoices'          => 'Login to view all invoices',
-    'create_invoice'        => 'Create Invoice',
-    'send_invoice'          => 'Send Invoice',
-    'get_paid'              => 'Get Paid',
-    'accept_payments'       => 'Accept Online Payments',
+    'all_invoices'          => 'سجّل الدخول لعرض جميع الفواتير',
+    'create_invoice'        => 'انشئ فاتورة',
+    'send_invoice'          => 'أرسل فاتورة',
+    'get_paid'              => 'إحصل عالمبلغ',
+    'accept_payments'       => 'قبول المدفوعات اﻹلكترونية',
 
-    'status' => [
+    'statuses' => [
         'draft'             => 'مسودة',
         'sent'              => 'تم الإرسال',
-        'viewed'            => 'المشاهدات',
-        'approved'          => 'تمت الموافقة',
+        'viewed'            => 'شُوهدت',
+        'approved'          => 'تم الموافقة عليه',
         'partial'           => 'جزئي',
         'paid'              => 'مدفوع',
+        'overdue'           => 'متأخر',
+        'unpaid'            => 'غير مدفوع',
     ],
 
     'messages' => [
-        'email_sent'        => 'تم إرسال الفاتورة بنجاح!',
-        'marked_sent'       => 'تم تحديد الفاتورة كفاتورة مرسلة بنجاح!',
+        'email_sent'        => 'تم إرسال الفاتورة عبر البريد اﻹلكتروني!',
+        'marked_sent'       => 'الفاتورة عُلّمت كمرسلة!',
+        'marked_paid'       => 'الفاتورة عُلّمت كمدفوع!',
         'email_required'    => 'لا يوجد عنوان البريد إلكتروني لهذا العميل!',
-        'draft'             => 'This is a <b>DRAFT</b> invoice and will be reflected to charts after it gets sent.',
+        'draft'             => 'هذه <b>مسودة</b> الفاتورة و سوف تظهر في النظام بعد ارسالها.',
 
         'status' => [
-            'created'       => 'Created on :date',
+            'created'       => 'أنشئت في :date',
+            'viewed'        => 'شُوهدت',
             'send' => [
-                'draft'     => 'Not sent',
-                'sent'      => 'Sent on :date',
+                'draft'     => 'لم يتم اﻹرسال',
+                'sent'      => 'أُرسلت في :date',
             ],
             'paid' => [
-                'await'     => 'Awaiting payment',
+                'await'     => 'في انتظار الدفع',
             ],
         ],
-    ],
-
-    'notification' => [
-        'message'           => 'قمت باستلام هذه الرسالة لأنه لديك فاتورة قادمة بقيمة :amount للعميل :customer.',
-        'button'            => 'الدفع الآن',
     ],
 
 ];

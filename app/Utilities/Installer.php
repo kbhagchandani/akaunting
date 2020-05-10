@@ -2,12 +2,13 @@
 
 namespace App\Utilities;
 
-use App\Models\Auth\User;
-use App\Models\Common\Company;
+use App\Jobs\Auth\CreateUser;
+use App\Jobs\Common\CreateCompany;
 use Artisan;
 use Config;
 use DB;
 use File;
+use Illuminate\Support\Str;
 
 /**
  * Class Installer
@@ -18,10 +19,9 @@ use File;
  */
 class Installer
 {
-
     public static function checkServerRequirements()
     {
-        $requirements = array();
+        $requirements = [];
 
         if (ini_get('safe_mode')) {
             $requirements[] = trans('install.requirements.disabled', ['feature' => 'Safe Mode']);
@@ -51,6 +51,38 @@ class Installer
             $requirements[] = trans('install.requirements.extension', ['extension' => 'MySQL PDO']);
         }
 
+        if (!extension_loaded('bcmath')) {
+            $requirements[] = trans('install.requirements.extension', ['extension' => 'BCMath']);
+        }
+
+        if (!extension_loaded('ctype')) {
+            $requirements[] = trans('install.requirements.extension', ['extension' => 'Ctype']);
+        }
+
+        if (!extension_loaded('curl')) {
+            $requirements[] = trans('install.requirements.extension', ['extension' => 'cURL']);
+        }
+
+        if (!extension_loaded('dom')) {
+            $requirements[] = trans('install.requirements.extension', ['extension' => 'DOM']);
+        }
+
+        if (!extension_loaded('fileinfo')) {
+            $requirements[] = trans('install.requirements.extension', ['extension' => 'FileInfo']);
+        }
+
+        if (!extension_loaded('gd')) {
+            $requirements[] = trans('install.requirements.extension', ['extension' => 'GD']);
+        }
+
+        if (!extension_loaded('json')) {
+            $requirements[] = trans('install.requirements.extension', ['extension' => 'JSON']);
+        }
+
+        if (!extension_loaded('mbstring')) {
+            $requirements[] = trans('install.requirements.extension', ['extension' => 'Mbstring']);
+        }
+
         if (!extension_loaded('openssl')) {
             $requirements[] = trans('install.requirements.extension', ['extension' => 'OpenSSL']);
         }
@@ -59,24 +91,12 @@ class Installer
             $requirements[] = trans('install.requirements.extension', ['extension' => 'Tokenizer']);
         }
 
-        if (!extension_loaded('mbstring')) {
-            $requirements[] = trans('install.requirements.extension', ['extension' => 'mbstring']);
-        }
-
-        if (!extension_loaded('curl')) {
-            $requirements[] = trans('install.requirements.extension', ['extension' => 'cURL']);
-        }
-
         if (!extension_loaded('xml')) {
             $requirements[] = trans('install.requirements.extension', ['extension' => 'XML']);
         }
 
         if (!extension_loaded('zip')) {
             $requirements[] = trans('install.requirements.extension', ['extension' => 'ZIP']);
-        }
-
-        if (!extension_loaded('fileinfo')) {
-            $requirements[] = trans('install.requirements.extension', ['extension' => 'FileInfo']);
         }
 
         if (!is_writable(base_path('storage/app'))) {
@@ -106,13 +126,13 @@ class Installer
 	public static function createDefaultEnvFile()
 	{
         // Rename file
-        if (is_file(base_path('.env.example'))) {
+        if (!is_file(base_path('.env')) && is_file(base_path('.env.example'))) {
             File::move(base_path('.env.example'), base_path('.env'));
         }
 
         // Update .env file
         static::updateEnv([
-            'APP_KEY'   =>  'base64:'.base64_encode(random_bytes(32)),
+            'APP_KEY' => 'base64:'.base64_encode(random_bytes(32)),
         ]);
 	}
 
@@ -131,8 +151,8 @@ class Installer
         // Create tables
         Artisan::call('migrate', ['--force' => true]);
 
-        // Create Roles
-        Artisan::call('db:seed', ['--class' => 'Database\Seeds\Roles', '--force' => true]);
+        // Create Permissions
+        Artisan::call('db:seed', ['--class' => 'Database\Seeds\Permissions', '--force' => true]);
 
         return true;
     }
@@ -176,7 +196,7 @@ class Installer
 
     public static function saveDbVariables($host, $port, $database, $username, $password)
     {
-        $prefix = strtolower(str_random(3) . '_');
+        $prefix = strtolower(Str::random(3) . '_');
 
         // Update .env file
         static::updateEnv([
@@ -207,46 +227,38 @@ class Installer
 
     public static function createCompany($name, $email, $locale)
     {
-        // Create company
-        $company = Company::create([
+        dispatch_now(new CreateCompany([
+            'name' => $name,
             'domain' => '',
-        ]);
-
-        // Set settings
-        setting()->setExtraColumns(['company_id' => $company->id]);
-        setting()->set([
-            'general.company_name'          => $name,
-            'general.company_email'         => $email,
-            'general.default_currency'      => 'USD',
-            'general.default_locale'        => $locale,
-        ]);
-        setting()->save();
+            'email' => $email,
+            'currency' => 'USD',
+            'locale' => $locale,
+            'enabled' => '1',
+        ]));
     }
 
     public static function createUser($email, $password, $locale)
     {
-        // Create the user
-        $user = User::create([
+        dispatch_now(new CreateUser([
             'name' => '',
             'email' => $email,
             'password' => $password,
             'locale' => $locale,
-        ]);
-
-        // Attach admin role
-        $user->roles()->attach('1');
-
-        // Attach company
-        $user->companies()->attach('1');
+            'companies' => ['1'],
+            'roles' => ['1'],
+            'enabled' => '1',
+        ]));
     }
 
     public static function finalTouches()
     {
         // Update .env file
         static::updateEnv([
-            'APP_LOCALE'    =>  session('locale'),
-            'APP_INSTALLED' =>  'true',
-            'APP_DEBUG'     =>  'false',
+            'APP_LOCALE'            =>  session('locale'),
+            'APP_INSTALLED'         =>  'true',
+            'APP_DEBUG'             =>  'false',
+            'FIREWALL_ENABLED'      =>  'true',
+            'MODEL_CACHE_ENABLED'   =>  'true',
         ]);
 
         // Rename the robots.txt file

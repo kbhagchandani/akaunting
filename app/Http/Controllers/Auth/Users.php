@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
+use App\Abstracts\Http\Controller;
 use App\Http\Requests\Auth\User as Request;
-use Illuminate\Http\Request as ARequest;
+use App\Jobs\Auth\CreateUser;
+use App\Jobs\Auth\DeleteUser;
+use App\Jobs\Auth\UpdateUser;
 use App\Models\Auth\User;
 use App\Models\Auth\Role;
 use App\Traits\Uploads;
-
-use Auth;
+use Illuminate\Http\Request as BaseRequest;
 
 class Users extends Controller
 {
@@ -24,10 +25,7 @@ class Users extends Controller
     {
         $users = User::with('roles')->collect();
 
-        $roles = collect(Role::all()->pluck('display_name', 'id'))
-            ->prepend(trans('general.all_type', ['type' => trans_choice('general.roles', 2)]), '');
-
-        return view('auth.users.index', compact('users', 'roles'));
+        return view('auth.users.index', compact('users'));
     }
 
     /**
@@ -37,17 +35,33 @@ class Users extends Controller
      */
     public function create()
     {
+        $routes = [
+            'dashboard' => trans_choice('general.dashboards', 1),
+            'items.index' => trans_choice('general.items', 2),
+            'invoices.index' => trans_choice('general.invoices', 2),
+            'revenues.index' => trans_choice('general.revenues', 2),
+            'customers.index' => trans_choice('general.customers', 2),
+            'bills.index' => trans_choice('general.bills', 2),
+            'payments.index' => trans_choice('general.payments', 2),
+            'vendors.index' => trans_choice('general.vendors', 2),
+            'accounts.index' => trans_choice('general.accounts', 2),
+            'transfers.index' => trans_choice('general.transfers', 2),
+            'transactions.index' => trans_choice('general.transactions', 2),
+            'reconciliations.index' => trans_choice('general.reconciliations', 2),
+            'reports.index' => trans_choice('general.reports', 2),
+            'settings.index' => trans_choice('general.settings', 2),
+            'categories.index' => trans_choice('general.categories', 2),
+            'currencies.index' => trans_choice('general.currencies', 2),
+            'taxes.index' => trans_choice('general.taxes', 2),
+        ];
+
         $roles = Role::all()->reject(function ($r) {
-            return $r->hasPermission('read-customer-panel');
+            return $r->hasPermission('read-client-portal');
         });
 
-        $companies = Auth::user()->companies()->get()->sortBy('name');
+        $companies = user()->companies()->get()->sortBy('name');
 
-        foreach ($companies as $company) {
-            $company->setSettings();
-        }
-
-        return view('auth.users.create', compact('roles', 'companies'));
+        return view('auth.users.create', compact('roles', 'companies', 'routes'));
     }
 
     /**
@@ -59,27 +73,23 @@ class Users extends Controller
      */
     public function store(Request $request)
     {
-        // Create user
-        $user = User::create($request->input());
+        $response = $this->ajaxDispatch(new CreateUser($request));
 
-        // Upload picture
-        if ($request->file('picture')) {
-            $media = $this->getMedia($request->file('picture'), 'users');
+        if ($response['success']) {
+            $response['redirect'] = route('users.index');
 
-            $user->attachMedia($media, 'picture');
+            $message = trans('messages.success.added', ['type' => trans_choice('general.users', 1)]);
+
+            flash($message)->success();
+        } else {
+            $response['redirect'] = route('users.create');
+
+            $message = $response['message'];
+
+            flash($message)->error();
         }
 
-        // Attach roles
-        $user->roles()->attach($request['roles']);
-
-        // Attach companies
-        $user->companies()->attach($request['companies']);
-
-        $message = trans('messages.success.added', ['type' => trans_choice('general.users', 1)]);
-
-        flash($message)->success();
-
-        return redirect('auth/users');
+        return response()->json($response);
     }
 
     /**
@@ -91,135 +101,138 @@ class Users extends Controller
      */
     public function edit(User $user)
     {
-        if ($user->customer) {
+        $routes = [
+            'dashboard' => trans_choice('general.dashboards', 1),
+            'items.index' => trans_choice('general.items', 2),
+            'invoices.index' => trans_choice('general.invoices', 2),
+            'revenues.index' => trans_choice('general.revenues', 2),
+            'customers.index' => trans_choice('general.customers', 2),
+            'bills.index' => trans_choice('general.bills', 2),
+            'payments.index' => trans_choice('general.payments', 2),
+            'vendors.index' => trans_choice('general.vendors', 2),
+            'accounts.index' => trans_choice('general.accounts', 2),
+            'transfers.index' => trans_choice('general.transfers', 2),
+            'transactions.index' => trans_choice('general.transactions', 2),
+            'reconciliations.index' => trans_choice('general.reconciliations', 2),
+            'reports.index' => trans_choice('general.reports', 2),
+            'settings.index' => trans_choice('general.settings', 2),
+            'categories.index' => trans_choice('general.categories', 2),
+            'currencies.index' => trans_choice('general.currencies', 2),
+            'taxes.index' => trans_choice('general.taxes', 2),
+        ];
+
+        if ($user->can('read-client-portal')) {
             // Show only roles with customer permission
             $roles = Role::all()->reject(function ($r) {
-                return !$r->hasPermission('read-customer-panel');
+                return !$r->hasPermission('read-client-portal');
             });
         } else {
             // Don't show roles with customer permission
             $roles = Role::all()->reject(function ($r) {
-                return $r->hasPermission('read-customer-panel');
+                return $r->hasPermission('read-client-portal');
             });
         }
 
-        $companies = Auth::user()->companies()->get()->sortBy('name');
+        $companies = user()->companies()->get()->sortBy('name');
 
-        foreach ($companies as $company) {
-            $company->setSettings();
-        }
-
-        return view('auth.users.edit', compact('user', 'companies', 'roles'));
+        return view('auth.users.edit', compact('user', 'companies', 'roles', 'routes'));
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  User  $user
-     * @param  Request  $request
+     * @param  User $user
+     * @param  Request $request
      *
      * @return Response
      */
     public function update(User $user, Request $request)
     {
-        // Do not reset password if not entered/changed
-        if (empty($request['password'])) {
-            unset($request['password']);
-            unset($request['password_confirmation']);
+        $response = $this->ajaxDispatch(new UpdateUser($user, $request));
+
+        if ($response['success']) {
+            $response['redirect'] = route('users.index');
+
+            $message = trans('messages.success.updated', ['type' => $user->name]);
+
+            flash($message)->success();
+        } else {
+            $response['redirect'] = route('users.edit', $user->id);
+
+            $message = $response['message'];
+
+            flash($message)->error();
         }
 
-        // Update user
-        $user->update($request->input());
-
-        // Upload picture
-        if ($request->file('picture')) {
-            $media = $this->getMedia($request->file('picture'), 'users');
-
-            $user->attachMedia($media, 'picture');
-        }
-
-        // Sync roles
-        $user->roles()->sync($request['roles']);
-
-        // Sync companies
-        $user->companies()->sync($request['companies']);
-
-        $message = trans('messages.success.updated', ['type' => trans_choice('general.users', 1)]);
-
-        flash($message)->success();
-
-        return redirect('auth/users');
+        return response()->json($response);
     }
 
     /**
      * Enable the specified resource.
      *
-     * @param  User  $user
+     * @param  User $user
      *
      * @return Response
      */
     public function enable(User $user)
     {
-        $user->enabled = 1;
-        $user->save();
+        $response = $this->ajaxDispatch(new UpdateUser($user, request()->merge(['enabled' => 1])));
 
-        $message = trans('messages.success.enabled', ['type' => trans_choice('general.users', 1)]);
+        if ($response['success']) {
+            $response['message'] = trans('messages.success.enabled', ['type' => $user->name]);
+        }
 
-        flash($message)->success();
-
-        return redirect()->route('users.index');
+        return response()->json($response);
     }
 
     /**
      * Disable the specified resource.
      *
-     * @param  User  $user
+     * @param  User $user
      *
      * @return Response
      */
     public function disable(User $user)
     {
-        $user->enabled = 0;
-        $user->save();
+        $response = $this->ajaxDispatch(new UpdateUser($user, request()->merge(['enabled' => 0])));
 
-        $message = trans('messages.success.disabled', ['type' => trans_choice('general.users', 1)]);
+        if ($response['success']) {
+            $response['message'] = trans('messages.success.disabled', ['type' => $user->name]);
+        }
 
-        flash($message)->success();
-
-        return redirect()->route('users.index');
+        return response()->json($response);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  User  $user
+     * @param  User $user
      *
      * @return Response
      */
     public function destroy(User $user)
     {
-        // Can't delete yourself
-        if ($user->id == \Auth::user()->id) {
-            $message = trans('auth.error.self_delete');
+        $response = $this->ajaxDispatch(new DeleteUser($user));
+
+        $response['redirect'] = route('users.index');
+
+        if ($response['success']) {
+            $message = trans('messages.success.deleted', ['type' => $user->name]);
+
+            flash($message)->success();
+        } else {
+            $message = $response['message'];
 
             flash($message)->error();
-
-            return redirect('auth/users');
         }
 
-        $user->delete();
-
-        $message = trans('messages.success.deleted', ['type' => trans_choice('general.users', 1)]);
-
-        flash($message)->success();
-
-        return redirect('auth/users');
+        return response()->json($response);
     }
 
     /**
      * Mark upcoming bills notifications are read and redirect to bills page.
      *
-     * @param  User  $user
+     * @param  User $user
      *
      * @return Response
      */
@@ -228,21 +241,20 @@ class Users extends Controller
         // Mark bill notifications as read
         foreach ($user->unreadNotifications as $notification) {
             // Not a bill notification
-            if ($notification->getAttribute('type') != 'App\Notifications\Expense\Bill') {
+            if ($notification->getAttribute('type') != 'App\Notifications\Purchase\Bill') {
                 continue;
             }
 
             $notification->markAsRead();
         }
 
-        // Redirect to bills
-        return redirect('expenses/bills');
+        return redirect()->route('bills.index');
     }
 
     /**
      * Mark overdue invoices notifications are read and redirect to invoices page.
      *
-     * @param  User  $user
+     * @param  User $user
      *
      * @return Response
      */
@@ -251,41 +263,17 @@ class Users extends Controller
         // Mark invoice notifications as read
         foreach ($user->unreadNotifications as $notification) {
             // Not an invoice notification
-            if ($notification->getAttribute('type') != 'App\Notifications\Income\Invoice') {
+            if ($notification->getAttribute('type') != 'App\Notifications\Sale\Invoice') {
                 continue;
             }
 
             $notification->markAsRead();
         }
 
-        // Redirect to invoices
-        return redirect('incomes/invoices');
+        return redirect()->route('invoices.index');
     }
 
-    /**
-     * Mark items out of stock notifications are read and redirect to items page.
-     *
-     * @param  User  $user
-     *
-     * @return Response
-     */
-    public function readItemsOutOfStock(User $user)
-    {
-        // Mark item notifications as read
-        foreach ($user->unreadNotifications as $notification) {
-            // Not an item notification
-            if ($notification->getAttribute('type') != 'App\Notifications\Common\Item') {
-                continue;
-            }
-
-            $notification->markAsRead();
-        }
-
-        // Redirect to items
-        return redirect('common/items');
-    }
-
-    public function autocomplete(ARequest $request)
+    public function autocomplete(BaseRequest $request)
     {
         $user = false;
         $data = false;

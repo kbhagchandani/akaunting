@@ -2,8 +2,9 @@
 
 return [
 
-    'previous'              => '&laquo; Previous',
-    'next'                  => 'Next &raquo;',
-    'showing'               => 'Showing :first to :last of :total :type',
+    'previous'              => 'Previous',
+    'next'                  => 'Next',
+    'showing'               => ':first-:last of :total records.',
+    'page'                  => 'per page.',
 
 ];
