@@ -1,9 +1,9 @@
 <h2>{{ $gateway['name'] }}</h2>
 
 @if ($gateway['description'])
-<pre class="well well-sm">
-{{ $gateway['description'] }}
-</pre>
+<div class="well well-sm">
+    {{ $gateway['description'] }}
+</div>
 @endif
 
 <div class="buttons">

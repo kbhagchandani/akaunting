@@ -70,6 +70,20 @@ class Versions
         // Check core first
         $url = 'core/version/' . $info['akaunting'] . '/' . $info['php'] . '/' . $info['mysql'] . '/' . $info['companies'];
 
+        $installed_modules = [];
+        $module_version = '?modules=';
+
+        foreach ($modules as $module) {
+            $alias = $module->get('alias');
+            $version = $module->get('version');
+
+            $installed_modules[] = $alias;
+        }
+
+        $module_version .= implode(',', $installed_modules);
+
+        $url .= $module_version;
+
         $data['core'] = static::getLatestVersion($url);
 
         // Then modules
@@ -110,9 +124,6 @@ class Versions
             return $latest;
         }
 
-        // Get the latest version
-        $latest = $content->data->latest;
-
-        return $latest;
+        return $content;
     }
 }

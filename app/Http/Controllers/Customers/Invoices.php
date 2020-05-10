@@ -34,7 +34,7 @@ class Invoices extends Controller
     {
         $invoices = Invoice::with(['customer', 'status', 'items', 'payments', 'histories'])
             ->accrued()->where('customer_id', auth()->user()->customer->id)
-            ->collect(['invoiced_at'=> 'desc']);
+            ->collect(['invoice_number'=> 'desc']);
 
         $categories = collect(Category::enabled()->type('income')->orderBy('name')->pluck('name', 'id'));
 
