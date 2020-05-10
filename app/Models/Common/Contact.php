@@ -4,13 +4,14 @@ namespace App\Models\Common;
 
 use App\Abstracts\Model;
 use Bkwld\Cloner\Cloneable;
+use App\Traits\Contacts;
 use App\Traits\Currencies;
 use App\Traits\Media;
 use Illuminate\Notifications\Notifiable;
 
 class Contact extends Model
 {
-    use Cloneable, Currencies, Media, Notifiable;
+    use Cloneable, Contacts, Currencies, Media, Notifiable;
 
     protected $table = 'contacts';
 
@@ -79,6 +80,28 @@ class Contact extends Model
         return $query->whereIn($this->table . '.type', (array) $types);
     }
 
+    /**
+     * Scope to include only vendors.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeVendor($query)
+    {
+        return $query->whereIn($this->table . '.type', (array) $this->getVendorTypes());
+    }
+
+    /**
+     * Scope to include only customers.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeCustomer($query)
+    {
+        return $query->whereIn($this->table . '.type', (array) $this->getCustomerTypes());
+    }
+
     public function scopeEmail($query, $email)
     {
         return $query->where('email', '=', $email);
@@ -86,6 +109,7 @@ class Contact extends Model
 
     public function onCloning($src, $child = null)
     {
+        $this->email = null;
         $this->user_id = null;
     }
 
@@ -109,12 +133,12 @@ class Contact extends Model
     {
         $amount = 0;
 
-        $collection = ($this->type == 'customer') ? 'invoices' : 'bills';
+        $collection = in_array($this->type, $this->getCustomerTypes()) ? 'invoices' : 'bills';
 
         $this->$collection()->accrued()->notPaid()->each(function ($item) use (&$amount) {
             $unpaid = $item->amount - $item->paid;
 
-            $amount += $this->convertFromDefault($unpaid, $item->currency_code, $item->currency_rate);
+            $amount += $this->convertToDefault($unpaid, $item->currency_code, $item->currency_rate);
         });
 
         return $amount;

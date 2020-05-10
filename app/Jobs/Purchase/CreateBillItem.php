@@ -36,11 +36,22 @@ class CreateBillItem extends Job
         $item_id = !empty($this->request['item_id']) ? $this->request['item_id'] : 0;
         $item_amount = (double) $this->request['price'] * (double) $this->request['quantity'];
 
+        $discount = 0;
+
         $item_discounted_amount = $item_amount;
 
-        // Apply discount to amount
+        // Apply line discount to amount
         if (!empty($this->request['discount'])) {
-            $item_discounted_amount = $item_amount - ($item_amount * ($this->request['discount'] / 100));
+            $discount += $this->request['discount'];
+
+            $item_discounted_amount = $item_amount -= ($item_amount * ($this->request['discount'] / 100));
+        }
+
+        // Apply global discount to amount
+        if (!empty($this->request['global_discount'])) {
+            $discount += $this->request['global_discount'];
+
+            $item_discounted_amount = $item_amount - ($item_amount * ($this->request['global_discount'] / 100));
         }
 
         $tax_amount = 0;
@@ -66,8 +77,8 @@ class CreateBillItem extends Job
                         $tax_amount = $tax->rate * (double) $this->request['quantity'];
 
                         $item_taxes[] = [
-                            'company_id' => $this->invoice->company_id,
-                            'invoice_id' => $this->invoice->id,
+                            'company_id' => $this->bill->company_id,
+                            'bill_id' => $this->bill->id,
                             'tax_id' => $tax_id,
                             'name' => $tax->name,
                             'amount' => $tax_amount,
@@ -110,7 +121,7 @@ class CreateBillItem extends Job
                     ];
                 }
 
-                $item_amount = ($item_amount - $item_tax_total) / (1 - $this->request['discount'] / 100);
+                $item_amount = ($item_amount - $item_tax_total) / (1 - $discount / 100);
             }
 
             if ($compounds) {
@@ -138,6 +149,7 @@ class CreateBillItem extends Job
             'quantity' => (double) $this->request['quantity'],
             'price' => (double) $this->request['price'],
             'tax' => $item_tax_total,
+            'discount_rate' => !empty($this->request['discount']) ? $this->request['discount'] : 0,
             'total' => $item_amount,
         ]);
 

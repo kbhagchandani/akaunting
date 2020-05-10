@@ -29,6 +29,12 @@ return [
             'before'        => 'Før nummer',
             'after'         => 'Efter nummer',
         ],
+        'discount_location' => [
+            'name'          => 'Rabat lokation',
+            'item'          => 'På linie',
+            'total'         => 'Ved total',
+            'both'          => 'Både linje og total',
+        ],
     ],
 
     'invoice' => [
@@ -52,6 +58,10 @@ return [
         'subheading'        => 'Undertitel',
         'due_receipt'       => 'Forfalder ved modtagelse',
         'due_days'          => 'Forfalder om :dage dage',
+        'choose_template'   => 'Vælg faktura skabelon',
+        'default'           => 'Standard',
+        'classic'           => 'Klassisk',
+        'modern'            => 'Moderne',
     ],
 
     'default' => [

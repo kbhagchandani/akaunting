@@ -28,6 +28,8 @@ return [
     'warning' => [
         'deleted'           => 'Warnung: Sie dürfen <b>:name</b> nicht löschen, da :text dazu in Bezug steht.',
         'disabled'          => 'Warnung: Sie dürfen <b>:name</b> nicht deaktivieren, da :text dazu in Bezug steht.',
+        'reconciled_tran'   => 'Warnung: Sie dürfen die Transaktion nicht ändern/löschen, da sie mit einem anderen Datensatz (Einnahme oder Ausgabe) verknüpft ist!',
+        'reconciled_doc'    => 'Warnung: Sie dürfen :type nicht ändern/löschen, da Transaktionen abgeglichen wurden!',
         'disable_code'      => 'Warnung: Sie dürfen die Währung von <b>:name</b> nicht deaktivieren oder verändern, da :text dazu in Bezug steht.',
         'payment_cancel'    => 'Warnung: Sie haben Ihre letzte Zahlung :method abgebrochen!',
     ],

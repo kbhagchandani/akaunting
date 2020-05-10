@@ -47,9 +47,13 @@ class Dashboards extends Controller
      *
      * @return Response
      */
-    public function show()
+    public function show(Dashboard $dashboard)
     {
         $dashboard_id = session('dashboard_id', 0);
+
+        if (!empty($dashboard->id)) {
+            $dashboard_id = $dashboard->id;
+        }
 
         // Change Dashboard
         if (request()->get('dashboard_id', 0)) {

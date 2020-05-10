@@ -17,6 +17,9 @@ class Event extends Provider
             'App\Listeners\Update\V20\Version200',
             'App\Listeners\Update\V20\Version203',
             'App\Listeners\Update\V20\Version205',
+            'App\Listeners\Update\V20\Version207',
+            'App\Listeners\Update\V20\Version208',
+            'App\Listeners\Update\V20\Version209',
         ],
         'Illuminate\Auth\Events\Login' => [
             'App\Listeners\Auth\Login',
@@ -31,8 +34,14 @@ class Event extends Provider
         'App\Events\Purchase\BillReceived' => [
             'App\Listeners\Purchase\MarkBillReceived',
         ],
+        'App\Events\Purchase\BillCancelled' => [
+            'App\Listeners\Purchase\MarkBillCancelled',
+        ],
         'App\Events\Purchase\BillRecurring' => [
             'App\Listeners\Purchase\SendBillRecurringNotification',
+        ],
+        'App\Events\Purchase\BillReminded' => [
+            'App\Listeners\Purchase\SendBillReminderNotification',
         ],
         'App\Events\Sale\PaymentReceived' => [
             'App\Listeners\Sale\CreateInvoiceTransaction',
@@ -45,11 +54,17 @@ class Event extends Provider
         'App\Events\Sale\InvoiceSent' => [
             'App\Listeners\Sale\MarkInvoiceSent',
         ],
+        'App\Events\Sale\InvoiceCancelled' => [
+            'App\Listeners\Sale\MarkInvoiceCancelled',
+        ],
         'App\Events\Sale\InvoiceViewed' => [
             'App\Listeners\Sale\MarkInvoiceViewed',
         ],
         'App\Events\Sale\InvoiceRecurring' => [
             'App\Listeners\Sale\SendInvoiceRecurringNotification',
+        ],
+        'App\Events\Sale\InvoiceReminded' => [
+            'App\Listeners\Sale\SendInvoiceReminderNotification',
         ],
         'App\Events\Menu\AdminCreated' => [
             'App\Listeners\Menu\AddAdminItems',

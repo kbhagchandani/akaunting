@@ -13,6 +13,7 @@
     <div class="row">
         <div class="col-md-8">
             <h3>{{ $module->name }}</h3>
+
             <div class="nav-wrapper">
                 <ul class="nav nav-pills nav-fill flex-column flex-md-row" id="tabs-icons-text" role="tablist">
                     <li class="nav-item">
@@ -49,6 +50,7 @@
 
         <div class="col-md-4">
             <h3>{{ trans_choice('general.actions', 1) }}</h3>
+
             <div class="card">
                 <div class="card-body">
                     <div id="countdown-pre-sale"></div>
@@ -85,17 +87,16 @@
                         @endif
                     @endpermission
 
-                    @if ($module->purchase_faq)
-                        <br>
-                        <div class="text-center">
-                            <a href="#" @click="onShowFaq" id="button-purchase-faq">{{ trans('modules.tab.faq')}}</a>
+                    @if (!empty($module->purchase_desc))
+                        <div class="text-center mt-3">
+                            {!! $module->purchase_desc !!}
                         </div>
                     @endif
                 </div>
             </div>
 
-
             <h3>{{ trans('modules.about') }}</h3>
+
             <div class="card">
                 <table class="table">
                     <tbody>

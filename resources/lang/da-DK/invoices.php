@@ -13,6 +13,7 @@ return [
     'price'                 => 'Pris',
     'sub_total'             => 'Subtotal',
     'discount'              => 'Rabat',
+    'item_discount'         => 'Linjerabat',
     'tax_total'             => 'Moms i alt',
     'total'                 => 'I alt',
 
@@ -29,6 +30,8 @@ return [
     'add_payment'           => 'Tilføj betaling',
     'mark_paid'             => 'Marker som betalt',
     'mark_sent'             => 'Marker som sendt',
+    'mark_viewed'           => 'Marker Set',
+    'mark_cancelled'        => 'Marker Annulleret',
     'download_pdf'          => 'Download som PDF',
     'send_mail'             => 'Send E-mail',
     'all_invoices'          => 'Log ind for at se alle fakturaer',
@@ -40,16 +43,21 @@ return [
     'statuses' => [
         'draft'             => 'Kladde',
         'sent'              => 'Sendt',
-        'viewed'            => 'Vist',
+        'viewed'            => 'Set',
         'approved'          => 'Godkendt',
-        'partial'           => 'Delvist',
+        'partial'           => 'Delvis',
         'paid'              => 'Betalt',
+        'overdue'           => 'Overskredet',
+        'unpaid'            => 'Ubetalt',
+        'cancelled'         => 'Annulleret',
     ],
 
     'messages' => [
         'email_sent'        => 'Faktura email er blevet sendt!',
         'marked_sent'       => 'Faktura er markeret som sendt!',
         'marked_paid'       => 'Faktura markeret som betalt!',
+        'marked_viewed'     => 'Faktura markeret som set!',
+        'marked_cancelled'  => 'Faktura markeret som annulleret!',
         'email_required'    => 'Ingen E-mail-adresse for kunden!',
         'draft'             => 'Dette er et <b>UDKAST</b> til faktura og vil blive vist som diagrammer, når det bliver sendt.',
 

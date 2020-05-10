@@ -15,6 +15,11 @@ abstract class DocumentModel extends Model
 {
     use Cloneable, Currencies, DateTime, Media, Recurring;
 
+    public function totals_sorted()
+    {
+        return $this->totals()->orderBy('sort_order');
+    }
+
     public function scopeDue($query, $date)
     {
         return $query->whereDate('due_at', '=', $date);
@@ -22,7 +27,7 @@ abstract class DocumentModel extends Model
 
     public function scopeAccrued($query)
     {
-        return $query->where('status', '<>', 'draft');
+        return $query->whereNotIn('status', ['draft', 'cancelled']);
     }
 
     public function scopePaid($query)
@@ -145,6 +150,9 @@ abstract class DocumentModel extends Model
                 break;
             case 'viewed':
                 $label = 'warning';
+                break;
+            case 'cancelled':
+                $label = 'dark';
                 break;
             default:
                 $label = 'primary';

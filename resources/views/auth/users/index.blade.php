@@ -48,7 +48,7 @@
                                 @if (user()->id != $item->id)
                                     {{ Form::bulkActionGroup($item->id, $item->name) }}
                                 @else
-                                    {{ Form::bulkActionGroup($item->id, $item->name, ['disabled' => 'disabled']) }}
+                                    {{ Form::bulkActionGroup($item->id, $item->name, ['disabled' => 'true']) }}
                                 @endif
                             </td>
                             <td class="col-xs-4 col-sm-3 col-md-2 col-lg-3">
@@ -87,10 +87,12 @@
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                         <a class="dropdown-item" href="{{ route('users.edit', $item->id) }}">{{ trans('general.edit') }}</a>
-                                        @permission('delete-auth-users')
-                                            <div class="dropdown-divider"></div>
-                                            {!! Form::deleteLink($item, 'users.destroy') !!}
-                                        @endpermission
+                                        @if (user()->id != $item->id)
+                                            @permission('delete-auth-users')
+                                                <div class="dropdown-divider"></div>
+                                                {!! Form::deleteLink($item, 'users.destroy') !!}
+                                            @endpermission
+                                        @endif
                                     </div>
                                 </div>
                             </td>

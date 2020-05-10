@@ -13,6 +13,7 @@ return [
     'price'                 => 'Price',
     'sub_total'             => 'Subtotal',
     'discount'              => 'Discount',
+    'item_discount'         => 'Line Discount',
     'tax_total'             => 'Tax Total',
     'total'                 => 'Total',
 
@@ -28,7 +29,9 @@ return [
     'histories'             => 'Histories',
     'payments'              => 'Payments',
     'add_payment'           => 'Add Payment',
+    'mark_paid'             => 'Mark Paid',
     'mark_received'         => 'Mark Received',
+    'mark_cancelled'        => 'Mark Cancelled',
     'download_pdf'          => 'Download PDF',
     'send_mail'             => 'Send Email',
     'create_bill'           => 'Create Bill',
@@ -42,10 +45,13 @@ return [
         'paid'              => 'Paid',
         'overdue'           => 'Overdue',
         'unpaid'            => 'Unpaid',
+        'cancelled'         => 'Cancelled',
     ],
 
     'messages' => [
-        'received'          => 'Bill marked as received successfully!',
+        'marked_received'   => 'Bill marked as received!',
+        'marked_paid'       => 'Bill marked as paid!',
+        'marked_cancelled'  => 'Bill marked as cancelled!',
         'draft'             => 'This is a <b>DRAFT</b> bill and will be reflected to charts after it gets received.',
 
         'status' => [

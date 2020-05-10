@@ -21,6 +21,7 @@ return [
         'disabled'          => ':feature 無効にする必要があります！',
         'extension'         => ':extension エクステンション 拡張機能をインストールしてロードする必要があります!',
         'directory'         => ':directory ディレクトリは書き込み可能である必要があります!',
+        'executable'        => 'PHP CLI 実行可能ファイルが定義されていないか、機能していないか、バージョンが :php_version  以降ではありません！ PHP_BINARY または PHP_PATH 環境変数を正しく設定するようにホスティング会社に依頼してください。',
     ],
 
     'database' => [
